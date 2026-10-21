@@ -122,6 +122,10 @@ Logic modules have no DOM access and are unit-tested; `src/ui/` holds the page.
   the tutorial card, K-map helper, gate cards, glossary popover, stats dialog and sharing
 - `src/ui/prefs.ts`, `storage.ts`, `dom.ts`: saved preferences, `localStorage` access and DOM helpers
 - `src/style.css`: styles, including the dark and high-contrast themes
+- `public/`: files served as-is at the site root: the favicon (`favicon.svg`, with a
+  `favicon.ico` fallback), the iOS home-screen icon and the link-preview image
+- `design/og-card.html`: source for `public/og-image.png`; to update the image, open it
+  in Chrome and capture a 1200×630 screenshot
 - `test/`: Vitest tests for the logic modules
 
 ## Hosting on GitHub Pages

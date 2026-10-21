@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- A NAND gate on the brand blue. -->
+  <rect width="64" height="64" rx="14" fill="#2f6fde"/>
+  <g fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M17 16 H31 A16 16 0 0 1 31 48 H17 Z"/>
+    <circle cx="51.5" cy="32" r="4.5"/>
+    <path d="M7 24 H17 M7 40 H17"/>
+  </g>
+</svg>

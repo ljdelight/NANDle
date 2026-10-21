@@ -1,0 +1,126 @@
+<!doctype html>
+<!--
+  Source for public/og-image.png, the 1200x630 link-preview image.
+  To regenerate it, open this file in Chrome and capture a 1200x630 screenshot
+  (DevTools > device toolbar > 1200 x 630 > "Capture screenshot").
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Nandle link preview</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        background: #111315;
+        color: #eceae4;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      }
+      .card {
+        box-sizing: border-box;
+        width: 1200px;
+        height: 630px;
+        padding: 64px 72px;
+        display: grid;
+        grid-template-columns: 1fr 520px;
+        align-items: center;
+        gap: 40px;
+        background:
+          radial-gradient(circle at 85% 30%, rgb(47 111 222 / 0.28), transparent 55%),
+          #111315;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+      }
+      .brand img {
+        width: 96px;
+        height: 96px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 104px;
+        letter-spacing: -0.02em;
+      }
+      .tagline {
+        margin: 26px 0 0;
+        font-size: 40px;
+        line-height: 1.25;
+        font-weight: 600;
+      }
+      .sub {
+        margin: 18px 0 0;
+        font-size: 28px;
+        color: #a0a4ab;
+      }
+      .tiles {
+        display: flex;
+        gap: 12px;
+        margin-top: 34px;
+      }
+      .tile {
+        width: 112px;
+        height: 58px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        font: 800 24px ui-monospace, 'SF Mono', Menlo, monospace;
+      }
+      .correct { background: #3f9e60; color: #0b1a10; }
+      .present { background: #b8952a; color: #14110a; }
+      .absent { background: #4a4e55; color: #fff; }
+      svg text {
+        font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+        font-weight: 800;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div>
+        <div class="brand">
+          <img src="../public/favicon.svg" alt="" />
+          <h1>Nandle</h1>
+        </div>
+        <p class="tagline">A daily logic-gate puzzle.<br />Learn how circuits think.</p>
+        <p class="sub">Find the gates behind the truth table in six runs.</p>
+        <div class="tiles">
+          <span class="tile correct">AND</span>
+          <span class="tile present">XOR</span>
+          <span class="tile absent">NOR</span>
+        </div>
+      </div>
+
+      <!-- A small lit circuit: A AND B, OR C, into Q. -->
+      <svg viewBox="0 0 520 360" width="520" height="360" aria-hidden="true">
+        <g fill="none" stroke-width="5" stroke-linejoin="round">
+          <path d="M70 70 H140 V112 H184" stroke="#ffc23d" />
+          <path d="M70 170 H140 V148 H184" stroke="#ffc23d" />
+          <path d="M70 290 H262 V218 H302" stroke="#8a9099" opacity="0.6" />
+          <path d="M256 130 H282 V182 H302" stroke="#ffc23d" />
+          <path d="M392 200 H436" stroke="#ffc23d" />
+        </g>
+        <g fill="none" stroke="#eceae4" stroke-width="5" stroke-linejoin="round">
+          <path d="M184 92 H218 A38 38 0 0 1 218 168 H184 Z" />
+          <path d="M302 162 Q324 200 302 238 Q356 238 392 200 Q356 162 302 162 Z" />
+        </g>
+        <g>
+          <rect x="10" y="48" width="60" height="44" rx="10" fill="#ffc23d" />
+          <text x="40" y="79" text-anchor="middle" font-size="26" fill="#1d1f22">A=1</text>
+          <rect x="10" y="148" width="60" height="44" rx="10" fill="#ffc23d" />
+          <text x="40" y="179" text-anchor="middle" font-size="26" fill="#1d1f22">B=1</text>
+          <rect x="10" y="268" width="60" height="44" rx="10" fill="#24282c" stroke="#33383d" stroke-width="2" />
+          <text x="40" y="299" text-anchor="middle" font-size="26" fill="#eceae4">C=0</text>
+          <text x="216" y="138" text-anchor="middle" font-size="22" fill="#eceae4">AND</text>
+          <text x="344" y="208" text-anchor="middle" font-size="22" fill="#eceae4">OR</text>
+          <rect x="436" y="176" width="78" height="48" rx="24" fill="#ffc23d" />
+          <text x="475" y="209" text-anchor="middle" font-size="26" fill="#1d1f22">Q=1</text>
+        </g>
+      </svg>
+    </div>
+  </body>
+</html>
