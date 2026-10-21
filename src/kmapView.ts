@@ -42,6 +42,7 @@ function groupRects(layout: KMapLayout, group: Implicant, index: number): string
   });
   const inset = 4 + (index % 4) * 3;
   const cls = `kgroup g${index % GROUP_COLORS}`;
+  const attrs = ` data-group="${index}"`;
   const rects: string[] = [];
   for (const [r0, r1] of runs(rows)) {
     for (const [c0, c1] of runs(cols)) {
@@ -49,7 +50,7 @@ function groupRects(layout: KMapLayout, group: Implicant, index: number): string
       const y = Y0 + r0 * S + inset;
       const w = (c1 - c0 + 1) * S - 2 * inset;
       const h = (r1 - r0 + 1) * S - 2 * inset;
-      rects.push(`<rect class="${cls}" x="${x}" y="${y}" width="${w}" height="${h}" rx="12"/>`);
+      rects.push(`<rect class="${cls}"${attrs} x="${x}" y="${y}" width="${w}" height="${h}" rx="12"/>`);
     }
   }
   return rects.join('');
@@ -102,15 +103,19 @@ function literalHtml(l: K.Literal): string {
   return l.negated ? `<span class="neg">${l.name}</span>` : l.name;
 }
 
-/** Expression with each term coloured like its group outline. */
+/**
+ * Expression with each term coloured and underlined like its group outline.
+ * Terms are focusable and carry data-group so hovering can spotlight a group.
+ */
 export function expressionHtml(groups: readonly Implicant[], inputs: readonly InputName[], form: Form): string {
-  const color = (i: number): string => `term g${i % GROUP_COLORS}`;
+  const term = (i: number, body: string): string =>
+    `<span class="term g${i % GROUP_COLORS}" data-group="${i}" tabindex="0" title="Highlight this group">${body}</span>`;
   if (form === 'sop') {
     if (groups.length === 0) return '0';
     return groups
       .map((g, i) => {
         const lits = K.literals(g, inputs, form);
-        return `<span class="${color(i)}">${lits.length ? lits.map(literalHtml).join('') : '1'}</span>`;
+        return term(i, lits.length ? lits.map(literalHtml).join('') : '1');
       })
       .join(' + ');
   }
@@ -118,9 +123,9 @@ export function expressionHtml(groups: readonly Implicant[], inputs: readonly In
   return groups
     .map((g, i) => {
       const lits = K.literals(g, inputs, form);
-      if (lits.length === 0) return `<span class="${color(i)}">0</span>`;
+      if (lits.length === 0) return term(i, '0');
       const body = lits.map(literalHtml).join(' + ');
-      return `<span class="${color(i)}">${lits.length > 1 || groups.length > 1 ? `(${body})` : body}</span>`;
+      return term(i, lits.length > 1 || groups.length > 1 ? `(${body})` : body);
     })
     .join('');
 }

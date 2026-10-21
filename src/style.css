@@ -8,11 +8,17 @@
   --wire: #6b7078;
   --accent: #2f6fde;
   --hi: #e8a317;
-  --correct: #3a9b5c;
+  /* Result colours. Every --on-* text colour is checked against its fill for
+     WCAG AA (4.5:1); --hit-ink and --miss are also used as text on --surface. */
+  --correct: #2e7d4f;
   --present: #c9a227;
-  --absent: #7a7d84;
-  --miss: #d9534f;
-  --on-tile: #ffffff;
+  --absent: #686b72;
+  --miss: #c0392b;
+  --hit-ink: var(--correct);
+  --on-correct: #ffffff;
+  --on-present: #1d1f22;
+  --on-absent: #ffffff;
+  --on-accent: #ffffff;
   --k0: #2f6fde;
   --k1: #d9480f;
   --k2: #2b8a3e;
@@ -40,6 +46,11 @@
     --present: #b8952a;
     --absent: #4a4e55;
     --miss: #e06763;
+    --hit-ink: #3f9e60;
+    --on-correct: #0b1a10;
+    --on-present: #14110a;
+    --on-absent: #ffffff;
+    --on-accent: #0b1220;
     --k0: #74a7ff;
     --k1: #ff8a50;
     --k2: #5fd17a;
@@ -47,6 +58,25 @@
     --k4: #3bc9db;
     --k5: #f783ac;
     color-scheme: dark;
+  }
+}
+
+/* High-contrast palette for colour-blind players: orange/blue results (as in
+   Wordle's mode) and a reddish purple for mistakes instead of red. Declared
+   after the dark theme so it wins in both themes. */
+:root[data-contrast='high'] {
+  --correct: #f5793a;
+  --present: #85c0f9;
+  --miss: #a8407a;
+  --hit-ink: #c4511a;
+  --on-correct: #111315;
+  --on-present: #111315;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-contrast='high']:not([data-theme='light']) {
+    --miss: #cc79a7;
+    --hit-ink: #f5793a;
   }
 }
 
@@ -116,7 +146,7 @@ kbd {
   height: 28px;
   border-radius: 8px;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   font-weight: 700;
 }
 
@@ -213,13 +243,14 @@ main {
 }
 
 .diff-beginner {
-  background: #0c8599;
+  background: #0a7480;
 }
 .diff-easy {
-  background: var(--correct);
+  background: #2e7d4f;
 }
 .diff-medium {
   background: var(--accent);
+  color: var(--on-accent);
 }
 .diff-hard {
   background: #b0602c;
@@ -256,7 +287,7 @@ main {
 
 .segmented button[aria-checked='true'] {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 /* ---------- circuit ---------- */
@@ -503,25 +534,28 @@ circle.junction.hi {
 .gate-btn.correct,
 .gate-btn.present,
 .gate-btn.absent {
-  color: var(--on-tile);
   border-color: transparent;
 }
 
 .gate-btn.correct {
   background: var(--correct);
+  color: var(--on-correct);
 }
 .gate-btn.present {
   background: var(--present);
+  color: var(--on-present);
 }
 .gate-btn.absent {
   background: var(--absent);
+  color: var(--on-absent);
 }
 
 .gate-btn.correct kbd,
 .gate-btn.present kbd,
 .gate-btn.absent kbd {
   background: transparent;
-  border-color: rgb(255 255 255 / 0.4);
+  color: inherit;
+  border-color: color-mix(in srgb, currentColor 40%, transparent);
 }
 
 .control-row {
@@ -541,7 +575,7 @@ circle.junction.hi {
 .btn.primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   min-width: 160px;
 }
 
@@ -622,13 +656,16 @@ circle.junction.hi {
 
 .tt td.hit {
   background: color-mix(in srgb, var(--correct) 22%, transparent);
-  color: var(--correct);
+  color: var(--hit-ink);
 }
 
 .tt td.miss {
   background: color-mix(in srgb, var(--miss) 22%, transparent);
   color: var(--miss);
   font-weight: 800;
+  /* Shape cue, so a miss doesn't rely on colour alone. */
+  outline: 1.5px dashed var(--miss);
+  outline-offset: -3px;
 }
 
 .tt td.probe {
@@ -647,7 +684,7 @@ circle.junction.hi {
 }
 
 .target-note.match {
-  fill: var(--correct);
+  fill: var(--hit-ink);
 }
 
 .target-note.mismatch {
@@ -775,6 +812,39 @@ circle.junction.hi {
   margin: 8px 0 0;
 }
 
+/* Groups and their terms share a dash/underline style, so they can be matched
+   without telling colours apart. Hovering a term spotlights its group. */
+.kgroup.g1 { stroke-dasharray: 10 5; }
+.kgroup.g2 { stroke-dasharray: 2 4; stroke-linecap: round; }
+.kgroup.g3 { stroke-dasharray: 14 4 2 4; }
+.kgroup.g4 { stroke-dasharray: 6 3; }
+.kgroup.g5 { stroke-dasharray: 1 3; stroke-linecap: round; }
+
+.term {
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.term.g1 { text-decoration-style: dashed; }
+.term.g2 { text-decoration-style: dotted; }
+.term.g3 { text-decoration-style: double; }
+.term.g4 { text-decoration-style: wavy; }
+.term.g5 { text-decoration-style: dotted; }
+.term:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+
+/* A minimal cover of a 4-input map has at most 8 groups. */
+#kmap-body[data-focus] .kgroup { opacity: 0.15; }
+#kmap-body[data-focus='0'] .kgroup[data-group='0'] { opacity: 1; stroke-width: 4; }
+#kmap-body[data-focus='1'] .kgroup[data-group='1'] { opacity: 1; stroke-width: 4; }
+#kmap-body[data-focus='2'] .kgroup[data-group='2'] { opacity: 1; stroke-width: 4; }
+#kmap-body[data-focus='3'] .kgroup[data-group='3'] { opacity: 1; stroke-width: 4; }
+#kmap-body[data-focus='4'] .kgroup[data-group='4'] { opacity: 1; stroke-width: 4; }
+#kmap-body[data-focus='5'] .kgroup[data-group='5'] { opacity: 1; stroke-width: 4; }
+#kmap-body[data-focus='6'] .kgroup[data-group='6'] { opacity: 1; stroke-width: 4; }
+#kmap-body[data-focus='7'] .kgroup[data-group='7'] { opacity: 1; stroke-width: 4; }
+
 .term.g0 { color: var(--k0); }
 .term.g1 { color: var(--k1); }
 .term.g2 { color: var(--k2); }
@@ -824,18 +894,46 @@ circle.junction.hi {
 .tile.correct,
 .tile.present,
 .tile.absent {
-  color: var(--on-tile);
   border-color: transparent;
 }
 
 .tile.correct {
   background: var(--correct);
+  color: var(--on-correct);
 }
 .tile.present {
   background: var(--present);
+  color: var(--on-present);
 }
 .tile.absent {
   background: var(--absent);
+  color: var(--on-absent);
+}
+
+/* Shape cues, so results don't rely on colour alone (e.g. in greyscale):
+   a tick for the right slot, a dashed ring for "used in another slot". */
+.tile {
+  position: relative;
+}
+
+:is(.tile, .gate-btn).correct::after {
+  content: '✓';
+  position: absolute;
+  top: 1px;
+  left: 5px;
+  font-size: 0.8rem;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.gate-btn.correct::after {
+  top: 4px;
+  left: 7px;
+}
+
+:is(.tile, .gate-btn).present {
+  outline: 2px dashed color-mix(in srgb, currentColor 55%, transparent);
+  outline-offset: -5px;
 }
 
 .tile.pending {
@@ -979,6 +1077,7 @@ circle.junction.hi {
 
 .bar.now {
   background: var(--correct);
+  color: var(--on-correct);
 }
 
 .next {
@@ -1038,6 +1137,73 @@ circle.junction.hi {
 .circuit-svg.compact .slot-num,
 .circuit-svg.compact .target-note {
   font-size: 13px;
+}
+
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.setting-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.setting-text small {
+  color: var(--ink-2);
+  font-size: 0.85rem;
+}
+
+.switch {
+  appearance: none;
+  flex: none;
+  width: 44px;
+  height: 26px;
+  margin: 0;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--ink-2);
+  transition: transform 0.15s, background 0.15s;
+}
+
+.switch:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.switch:checked::after {
+  transform: translateX(18px);
+  background: #fff;
+}
+
+.switch:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.setting-preview {
+  margin-top: 14px;
 }
 
 .dialog-actions {
@@ -1122,7 +1288,20 @@ circle.junction.hi {
   }
 }
 
-@media (max-width: 360px) {
+@media (max-width: 420px) {
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+  }
+  .actions {
+    gap: 4px;
+  }
+  .mode {
+    padding: 4px 10px;
+  }
+}
+
+@media (max-width: 380px) {
   .brand h1 {
     display: none;
   }

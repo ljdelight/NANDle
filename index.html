@@ -19,6 +19,7 @@
       <div class="actions">
         <button class="icon-btn" id="btn-help" aria-label="How to play">?</button>
         <button class="icon-btn" id="btn-stats" aria-label="Statistics">▥</button>
+        <button class="icon-btn" id="btn-settings" aria-label="Settings">⚙</button>
       </div>
     </header>
 
@@ -88,14 +89,31 @@
         <li>Stuck? Open the <b>K-map helper</b> to see the target as a Karnaugh map, with its simplest groupings.</li>
       </ol>
       <div class="legend">
-        <div><span class="tile correct">AND</span> Right gate, right slot.</div>
-        <div><span class="tile present">XOR</span> Used in another slot.</div>
+        <div><span class="tile correct">AND</span> Right gate, right slot (✓).</div>
+        <div><span class="tile present">XOR</span> Used in another slot (dashed ring).</div>
         <div><span class="tile absent">NOR</span> Not used anywhere (or no more copies).</div>
       </div>
       <p class="fine">Colours compare against one hidden circuit, but <b>any</b> circuit that matches the whole truth table wins. A new daily puzzle arrives at midnight and gets harder through the week.</p>
       <h3>Gates</h3>
       <div class="gate-ref" id="gate-ref"></div>
       <form method="dialog" class="dialog-actions"><button class="btn primary">Let's play</button></form>
+    </dialog>
+
+    <dialog id="dlg-settings" class="dialog">
+      <form method="dialog"><button class="close" aria-label="Close">×</button></form>
+      <h2>Settings</h2>
+      <label class="setting">
+        <span class="setting-text">
+          <b>High-contrast colours</b>
+          <small>Orange and blue instead of green and yellow, for colour-blind players. Shared results use 🟧🟦.</small>
+        </span>
+        <input type="checkbox" class="switch" id="set-contrast" role="switch" />
+      </label>
+      <div class="legend setting-preview" aria-hidden="true">
+        <div><span class="tile correct">AND</span> Right gate, right slot (✓)</div>
+        <div><span class="tile present">XOR</span> Used in another slot (dashed ring)</div>
+        <div><span class="tile absent">NOR</span> Not used</div>
+      </div>
     </dialog>
 
     <dialog id="dlg-stats" class="dialog">

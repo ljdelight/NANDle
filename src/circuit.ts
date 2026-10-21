@@ -223,8 +223,10 @@ export function render(topo: Topology, opts: RenderOptions): string {
   );
   if (opts.target !== null) {
     const verdict = outV === undefined ? '' : outV === opts.target ? ' match' : ' mismatch';
+    // A symbol as well as a colour, so the verdict doesn't rely on colour vision.
+    const mark = outV === undefined ? '' : outV === opts.target ? ' ✓' : ' ✗';
     parts.push(
-      `<text class="target-note${verdict}" x="${L.out.x + 12}" y="${L.out.y + 30}" text-anchor="middle">want ${opts.target}</text>`
+      `<text class="target-note${verdict}" x="${L.out.x + 12}" y="${L.out.y + 30}" text-anchor="middle">want ${opts.target}${mark}</text>`
     );
   }
 

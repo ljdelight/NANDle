@@ -7,12 +7,14 @@ import * as K from './kmap';
 import type { Form } from './kmap';
 import { expressionHtml, renderKMap } from './kmapView';
 import * as L from './logic';
+import { shareText as formatShare } from './share';
 import type { Bit, DailyPuzzle, Difficulty, Gate, Puzzle, Score, Topology } from './logic';
 
 const MAX_RUNS = 6;
 const STATS_KEY = 'nandle:stats';
 const SEEN_HELP_KEY = 'nandle:seen-help';
 const HELPER_KEY = 'nandle:helper';
+const SETTINGS_KEY = 'nandle:settings';
 const dailyKey = (k: string): string => 'nandle:daily:' + k;
 
 type Mode = 'daily' | 'practice';
@@ -41,6 +43,10 @@ interface SavedDaily {
   topoId: string;
   guesses: Gate[][];
   status: Status;
+}
+
+interface Settings {
+  highContrast: boolean;
 }
 
 type HelperForm = Form | 'none';
@@ -143,6 +149,10 @@ function isStats(v: unknown): v is Stats {
 
 const isTrue = (v: unknown): v is boolean => v === true;
 
+function isSettings(v: unknown): v is Settings {
+  return isRecord(v) && typeof v.highContrast === 'boolean';
+}
+
 const isHelperForm = (v: unknown): v is HelperForm => v === 'none' || v === 'sop' || v === 'pos';
 
 function isHelperPrefs(v: unknown): v is HelperPrefs {
@@ -157,6 +167,19 @@ function isDaily(p: Puzzle | DailyPuzzle): p is DailyPuzzle {
 
 let state: GameState;
 let practiceDifficulty: Difficulty = 'Medium';
+// Until the player chooses, follow the operating system's contrast preference.
+const settings: Settings = store.get<Settings>(
+  SETTINGS_KEY,
+  { highContrast: window.matchMedia('(prefers-contrast: more)').matches },
+  isSettings
+);
+
+function applySettings(): void {
+  if (settings.highContrast) document.documentElement.dataset.contrast = 'high';
+  else delete document.documentElement.dataset.contrast;
+  $<HTMLInputElement>('#set-contrast').checked = settings.highContrast;
+}
+
 const helper: HelperPrefs = store.get<HelperPrefs>(
   HELPER_KEY,
   { open: false, form: 'none', markGuess: true },
@@ -613,15 +636,15 @@ function updateCountdown(): void {
 // ---------- sharing & feedback ----------
 
 function shareText(): string {
-  const emoji: Readonly<Record<Score, string>> = { correct: '🟩', present: '🟨', absent: '⬛' };
-  const rows = state.puzzle.table.length;
   const p = state.puzzle;
-  const title = isDaily(p)
-    ? `Nandle #${p.number} (${p.difficulty})`
-    : `Nandle practice (${p.difficulty})`;
-  const score = state.status === 'won' ? String(state.guesses.length) : 'X';
-  const lines = state.guesses.map((g) => g.score.map((s) => emoji[s]).join('') + ` ${g.matched}/${rows}`);
-  return `${title} ${score}/${MAX_RUNS}\n${lines.join('\n')}`;
+  return formatShare({
+    title: isDaily(p) ? `Nandle #${p.number} (${p.difficulty})` : `Nandle practice (${p.difficulty})`,
+    runs: state.guesses,
+    won: state.status === 'won',
+    maxRuns: MAX_RUNS,
+    rows: p.table.length,
+    highContrast: settings.highContrast,
+  });
 }
 
 function share(): void {
@@ -737,12 +760,32 @@ function bind(): void {
     helper.form = form;
     saveHelper();
   });
+  // Spotlight a K-map group while its term is hovered, focused or tapped.
+  const kmapBody = $('#kmap-body');
+  const spotlight = (e: Event): void => {
+    const group = closestData(e.target, 'group')?.dataset.group;
+    if (group === undefined) delete kmapBody.dataset.focus;
+    else kmapBody.dataset.focus = group;
+  };
+  const expr = $('#kmap-expr');
+  expr.addEventListener('mouseover', spotlight);
+  expr.addEventListener('focusin', spotlight);
+  expr.addEventListener('click', spotlight);
+  expr.addEventListener('mouseleave', () => delete kmapBody.dataset.focus);
+  expr.addEventListener('focusout', () => delete kmapBody.dataset.focus);
   $<HTMLInputElement>('#kmap-guess').addEventListener('change', (e: Event) => {
     if (e.target instanceof HTMLInputElement) helper.markGuess = e.target.checked;
     saveHelper();
   });
   $('#btn-help').addEventListener('click', () => $<HTMLDialogElement>('#dlg-help').showModal());
   $('#btn-stats').addEventListener('click', openStats);
+  $('#btn-settings').addEventListener('click', () => $<HTMLDialogElement>('#dlg-settings').showModal());
+  $<HTMLInputElement>('#set-contrast').addEventListener('change', (e: Event) => {
+    if (!(e.target instanceof HTMLInputElement)) return;
+    settings.highContrast = e.target.checked;
+    store.set(SETTINGS_KEY, settings);
+    applySettings();
+  });
   narrowScreen.addEventListener('change', renderCircuit);
   setInterval(() => {
     if ($<HTMLDialogElement>('#dlg-stats').open) updateCountdown();
@@ -771,6 +814,7 @@ function renderGateRef(): void {
   ).join('');
 }
 
+applySettings();
 loadDaily();
 bind();
 renderGateRef();

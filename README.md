@@ -34,6 +34,18 @@ circuit and watch the signals travel through the wires.
 | Hard     | 3 gates, 4 inputs        | all six                         | Fri, Sun      |
 | Expert   | 4 gates, 4 inputs        | all six                         | Saturday      |
 
+**Settings (⚙)** has a high-contrast mode for colour-blind players. It uses
+orange and blue tiles (🟧🟦 in shared results) and purple for mistakes in place
+of red, and it switches on automatically if the OS asks for more contrast.
+Feedback never relies on colour alone, in any mode:
+
+- right-slot tiles carry a ✓, and "used elsewhere" tiles have a dashed ring;
+- truth-table misses get a dashed outline, and Q shows ✓/✗;
+- each K-map group's dash pattern matches its term's underline, and hovering or
+  tapping a term spotlights its group.
+
+Text and tile colours meet WCAG AA contrast (4.5:1) in both themes.
+
 Daily puzzles are seeded from the local date. Practice mode serves unlimited
 random puzzles at any level. Progress and
 stats are kept in `localStorage`.
