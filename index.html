@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nandle</title>
+    <meta name="description" content="A daily logic-design puzzle: find the gates that produce the target truth table." />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">⊼</span>
+        <h1>Nandle</h1>
+      </div>
+      <nav class="modes" aria-label="Game mode">
+        <button class="mode" data-mode="daily" aria-pressed="true">Daily</button>
+        <button class="mode" data-mode="practice" aria-pressed="false">Practice</button>
+      </nav>
+      <div class="actions">
+        <button class="icon-btn" id="btn-help" aria-label="How to play">?</button>
+        <button class="icon-btn" id="btn-stats" aria-label="Statistics">▥</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="meta" id="meta"></section>
+
+      <section class="practice-bar" id="practice-bar" hidden>
+        <div class="segmented" id="difficulty" role="radiogroup" aria-label="Difficulty"></div>
+        <button class="btn ghost" id="btn-new">New puzzle</button>
+      </section>
+
+      <section class="card circuit-card">
+        <div id="circuit"></div>
+        <p class="circuit-hint" id="circuit-hint"></p>
+      </section>
+
+      <section class="controls" id="controls">
+        <div class="palette" id="palette"></div>
+        <div class="control-row">
+          <button class="btn ghost" id="btn-clear">Clear</button>
+          <button class="btn primary" id="btn-run">Run circuit</button>
+        </div>
+      </section>
+
+      <section class="result" id="result" hidden></section>
+
+      <section class="card">
+        <h2>Truth table</h2>
+        <div class="table-wrap" id="truth-table"></div>
+      </section>
+
+      <section class="card kmap-card">
+        <div class="card-head">
+          <h2>K-map helper</h2>
+          <button class="btn small" id="btn-kmap" aria-expanded="false" aria-controls="kmap-body">Show</button>
+        </div>
+        <div id="kmap-body" hidden>
+          <div class="kmap-controls">
+            <div class="segmented" id="kmap-form" role="radiogroup" aria-label="Grouping"></div>
+            <label class="check"><input type="checkbox" id="kmap-guess" /> Mark my last run</label>
+          </div>
+          <div class="kmap-wrap" id="kmap"></div>
+          <p class="kexpr" id="kmap-expr"></p>
+          <p class="fine knotes" id="kmap-notes"></p>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Attempts</h2>
+        <ol class="board" id="board"></ol>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <dialog id="dlg-help" class="dialog">
+      <form method="dialog"><button class="close" aria-label="Close">×</button></form>
+      <h2>How to play</h2>
+      <p>A hidden circuit of logic gates drives the output <b>Q</b>. You can see its <b>truth table</b>; find gates that produce it in <b>6 runs</b>.</p>
+      <ol>
+        <li>Tap a gate slot, then pick a gate. Keys <kbd>1</kbd>–<kbd>6</kbd> pick gates, arrow keys move between slots.</li>
+        <li>Tap the inputs (or press <kbd>A</kbd>–<kbd>D</kbd>) to try values and watch them flow through your circuit; the truth table highlights that column and Q shows the wanted output.</li>
+        <li>Press <b>Run circuit</b> (<kbd>Enter</kbd>) to test it.</li>
+        <li>Each slot gets a colour, and the truth table shows which rows your circuit got right.</li>
+        <li>Stuck? Open the <b>K-map helper</b> to see the target as a Karnaugh map, with its simplest groupings.</li>
+      </ol>
+      <div class="legend">
+        <div><span class="tile correct">AND</span> Right gate, right slot.</div>
+        <div><span class="tile present">XOR</span> Used in another slot.</div>
+        <div><span class="tile absent">NOR</span> Not used anywhere (or no more copies).</div>
+      </div>
+      <p class="fine">Colours compare against one hidden circuit, but <b>any</b> circuit that matches the whole truth table wins. A new daily puzzle arrives at midnight and gets harder through the week.</p>
+      <h3>Gates</h3>
+      <div class="gate-ref" id="gate-ref"></div>
+      <form method="dialog" class="dialog-actions"><button class="btn primary">Let's play</button></form>
+    </dialog>
+
+    <dialog id="dlg-stats" class="dialog">
+      <form method="dialog"><button class="close" aria-label="Close">×</button></form>
+      <h2>Statistics</h2>
+      <div class="stats" id="stats"></div>
+      <h3>Runs needed</h3>
+      <div class="dist" id="dist"></div>
+      <p class="next" id="next"></p>
+    </dialog>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
