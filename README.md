@@ -50,6 +50,11 @@ Daily puzzles are seeded from the local date. Practice mode serves unlimited
 random puzzles at any level. Progress and
 stats are kept in `localStorage`.
 
+First-time players start with a short **tutorial**: a one-gate warm-up that
+walks through flipping an input, reading the truth table, a deliberately wrong
+first try and how to read its feedback, then the solve. It can be skipped, and
+replayed from the help dialog.
+
 ## Development
 
 Written in strict TypeScript, bundled with Vite and tested with Vitest. It has

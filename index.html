@@ -52,7 +52,7 @@
         <div class="table-wrap" id="truth-table"></div>
       </section>
 
-      <section class="card kmap-card">
+      <section class="card kmap-card" id="kmap-card">
         <div class="card-head">
           <h2>K-map helper</h2>
           <button class="btn small" id="btn-kmap" aria-expanded="false" aria-controls="kmap-body">Show</button>
@@ -73,6 +73,8 @@
         <ol class="board" id="board"></ol>
       </section>
     </main>
+
+    <aside class="coach" id="coach" hidden aria-live="polite" aria-label="Tutorial"></aside>
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -96,7 +98,10 @@
       <p class="fine">Colours compare against one hidden circuit, but <b>any</b> circuit that matches the whole truth table wins. A new daily puzzle arrives at midnight and gets harder through the week.</p>
       <h3>Gates</h3>
       <div class="gate-ref" id="gate-ref"></div>
-      <form method="dialog" class="dialog-actions"><button class="btn primary">Let's play</button></form>
+      <form method="dialog" class="dialog-actions">
+        <button class="btn ghost" type="button" id="btn-tutorial">Play the tutorial</button>
+        <button class="btn primary">Let's play</button>
+      </form>
     </dialog>
 
     <dialog id="dlg-settings" class="dialog">

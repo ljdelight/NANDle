@@ -10,7 +10,7 @@ export type InputName = 'A' | 'B' | 'C' | 'D';
 export type SourceRef = InputName | number;
 export type Score = 'correct' | 'present' | 'absent';
 
-export type TopologyId = 'chain' | 'split' | 'loop' | 'quad' | 'cascade';
+export type TopologyId = 'single' | 'chain' | 'split' | 'loop' | 'quad' | 'cascade';
 export type Difficulty = 'Beginner' | 'Easy' | 'Medium' | 'Hard' | 'Expert';
 
 export interface Topology {
@@ -59,6 +59,8 @@ export const GATE_FN: Readonly<Record<Gate, (a: Bit, b: Bit) => Bit>> = {
 };
 
 export const TOPOLOGIES: Readonly<Record<TopologyId, Topology>> = {
+  /** Used only by the tutorial. */
+  single: { id: 'single', inputs: ['A', 'B'], gates: [['A', 'B']] },
   chain: { id: 'chain', inputs: ['A', 'B', 'C'], gates: [['A', 'B'], [0, 'C']] },
   split: { id: 'split', inputs: ['A', 'B', 'C'], gates: [['A', 'B'], ['B', 'C'], [0, 1]] },
   loop: { id: 'loop', inputs: ['A', 'B', 'C'], gates: [['A', 'B'], [0, 'C'], [1, 'A']] },
@@ -291,6 +293,23 @@ export function dailyPuzzle(date: Date): DailyPuzzle {
   const ids = LEVELS[difficulty].topologies;
   const puzzle = generatePuzzle(difficulty, at(ids, seed % ids.length), seed);
   return { ...puzzle, dateKey: key, number: puzzleNumber(date) };
+}
+
+/** The tutorial's warm-up: one AND gate, solved after a suggested wrong try with OR. */
+export function tutorialPuzzle(): Puzzle {
+  const topo = TOPOLOGIES.single;
+  const gates = LEVELS.Beginner.gates;
+  const solution: Gate[] = ['AND'];
+  const table = truthTable(topo, solution);
+  return {
+    difficulty: 'Beginner',
+    topoId: topo.id,
+    gates,
+    solution,
+    table,
+    solutionCount: countSolutions(topo, table, gates),
+    seed: 0,
+  };
 }
 
 export function practicePuzzle(difficulty: Difficulty, seed: number): Puzzle {

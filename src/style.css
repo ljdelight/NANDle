@@ -1086,6 +1086,95 @@ circle.junction.hi {
   margin: 16px 0 0;
 }
 
+/* ---------- tutorial coach ---------- */
+
+.coach {
+  position: fixed;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - 24px));
+  max-height: 46vh;
+  overflow-y: auto;
+  z-index: 15;
+  background: var(--surface);
+  border: 2px solid var(--accent);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.3);
+}
+
+.coach h2 {
+  margin: 4px 0 6px;
+  font-size: 1.1rem;
+}
+
+.coach p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.coach-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--ink-2);
+}
+
+.coach-skip {
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  text-decoration: underline;
+  font-size: 0.8rem;
+  padding: 4px 0;
+}
+
+.coach-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+/* Room to scroll everything above the coach card. */
+body.coaching main {
+  padding-bottom: 260px;
+}
+
+/* Spotlight on whatever the current step is about. */
+.coach-target {
+  border-radius: 10px;
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+  animation: coach-pulse 1.4s ease-in-out infinite;
+}
+
+.terminal.coach-target {
+  outline: none;
+  animation: coach-pulse-svg 1.4s ease-in-out infinite;
+}
+
+.terminal.coach-target rect {
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+@keyframes coach-pulse {
+  50% {
+    outline-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+}
+
+
+@keyframes coach-pulse-svg {
+  50% {
+    opacity: 0.55;
+  }
+}
+
 /* ---------- toast & motion ---------- */
 
 .toast {
@@ -1308,7 +1397,9 @@ circle.junction.hi {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shake {
+  .shake,
+  .coach-target,
+  .terminal.coach-target {
     animation: none;
   }
 }

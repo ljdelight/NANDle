@@ -7,17 +7,21 @@ import * as K from './kmap';
 import type { Form } from './kmap';
 import { expressionHtml, renderKMap } from './kmapView';
 import * as L from './logic';
+import * as T from './tutorial';
+import type { StepId, TutorialEvent } from './tutorial';
 import { shareText as formatShare } from './share';
 import type { Bit, DailyPuzzle, Difficulty, Gate, Puzzle, Score, Topology } from './logic';
 
 const MAX_RUNS = 6;
 const STATS_KEY = 'nandle:stats';
-const SEEN_HELP_KEY = 'nandle:seen-help';
+const TUTORIAL_DONE_KEY = 'nandle:tutorial-done';
 const HELPER_KEY = 'nandle:helper';
 const SETTINGS_KEY = 'nandle:settings';
 const dailyKey = (k: string): string => 'nandle:daily:' + k;
 
-type Mode = 'daily' | 'practice';
+/** Modes reachable from the header; the tutorial is entered separately. */
+type PlayMode = 'daily' | 'practice';
+type Mode = PlayMode | 'tutorial';
 type Status = 'playing' | 'won' | 'lost';
 
 interface Guess {
@@ -37,6 +41,8 @@ interface GameState {
   status: Status;
   /** Current input values, one per topology input, for probing the circuit. */
   probe: Bit[];
+  /** Current tutorial step; null outside the tutorial. */
+  coach: StepId | null;
 }
 
 interface SavedDaily {
@@ -197,6 +203,7 @@ function startGame(mode: Mode, puzzle: Puzzle | DailyPuzzle): void {
     selected: 0,
     status: 'playing',
     probe: topo.inputs.map((): Bit => 0),
+    coach: null,
   };
 }
 
@@ -221,6 +228,11 @@ function loadDaily(): void {
     state.status = saved.status;
     if (state.status !== 'playing') finishBoard();
   }
+}
+
+function loadTutorial(): void {
+  startGame('tutorial', L.tutorialPuzzle());
+  state.coach = 'welcome';
 }
 
 function loadPractice(): void {
@@ -252,6 +264,7 @@ function render(): void {
   renderHelper();
   renderBoard();
   renderResult();
+  renderCoach();
 }
 
 function renderModes(): void {
@@ -264,15 +277,17 @@ function renderModes(): void {
     .join('');
 }
 
+const plural = (n: number, word: string): string => `${n} ${word}${n === 1 ? '' : 's'}`;
+
 function renderMeta(): void {
   const p = state.puzzle;
-  const title = isDaily(p) ? `Puzzle #${p.number}` : 'Practice';
+  const title = isDaily(p) ? `Puzzle #${p.number}` : state.mode === 'tutorial' ? 'Tutorial' : 'Practice';
   const others = p.solutionCount > 1 ? ` · ${p.solutionCount} circuits fit` : '';
   const palette = p.gates.length < L.GATES.length ? ` · ${p.gates.length} gate types` : '';
   $('#meta').innerHTML =
     `<span class="meta-title">${title}</span>` +
     `<span class="pill diff-${p.difficulty.toLowerCase()}">${p.difficulty}</span>` +
-    `<span class="meta-sub">${state.topo.gates.length} gates · ${state.topo.inputs.length} inputs${palette}${others}</span>` +
+    `<span class="meta-sub">${plural(state.topo.gates.length, 'gate')} · ${plural(state.topo.inputs.length, 'input')}${palette}${others}</span>` +
     `<span class="meta-runs">Run ${Math.min(state.guesses.length + 1, MAX_RUNS)}/${MAX_RUNS}</span>`;
 }
 
@@ -297,6 +312,7 @@ function renderCircuit(): void {
     compact: narrowScreen.matches,
   });
   renderFormula(playing ? state.selected : null);
+  spotlightCoachTarget();
   const names = state.topo.inputs;
   $('#circuit-hint').textContent = playing
     ? `Tap a slot to pick its gate. Tap ${names[0]}–${names[names.length - 1]} to try inputs.`
@@ -402,6 +418,8 @@ function helperNotes(form: HelperForm): string {
 }
 
 function renderHelper(): void {
+  // Keep the first game uncluttered.
+  $('#kmap-card').hidden = state.mode === 'tutorial';
   const btn = $('#btn-kmap');
   btn.textContent = helper.open ? 'Hide' : 'Show';
   btn.setAttribute('aria-expanded', String(helper.open));
@@ -461,7 +479,8 @@ function renderBoard(): void {
 function renderResult(): void {
   const el = $('#result');
   const last = state.guesses[state.guesses.length - 1];
-  if (state.status === 'playing' || !last) {
+  // The tutorial's own coach card covers the ending.
+  if (state.status === 'playing' || !last || state.mode === 'tutorial') {
     el.hidden = true;
     return;
   }
@@ -512,6 +531,7 @@ function placeGate(type: Gate): void {
     }
   }
   refreshPlay();
+  coachEvent({ kind: 'place', gate: type });
 }
 
 function clearSlot(): void {
@@ -558,6 +578,7 @@ function run(): void {
   }
   saveDaily();
   render();
+  coachEvent({ kind: 'run', won: state.status === 'won' });
   if (state.status !== 'playing' && state.mode === 'daily') setTimeout(openStats, 1400);
 }
 
@@ -569,9 +590,81 @@ function finishBoard(): void {
 function toggleInput(name: string): void {
   const i = state.topo.inputs.findIndex((n) => n === name);
   if (i === -1) return;
-  state.probe[i] = state.probe[i] ? 0 : 1;
+  const value: Bit = state.probe[i] ? 0 : 1;
+  state.probe[i] = value;
   renderCircuit();
   renderTable();
+  const input = state.topo.inputs[i];
+  if (input) coachEvent({ kind: 'toggle', input, value });
+}
+
+// ---------- tutorial ----------
+
+let scrolledToStep: StepId | null = null;
+
+function coachEvent(event: TutorialEvent): void {
+  if (!state.coach) return;
+  const next = T.advance(state.coach, event);
+  if (next === state.coach) return;
+  state.coach = next;
+  if (next === 'done') store.set(TUTORIAL_DONE_KEY, true);
+  renderCoach();
+}
+
+function runContext(): T.RunContext {
+  const last = state.guesses[state.guesses.length - 1];
+  return { gate: last?.gates[0] ?? null, matched: last?.matched ?? 0, rows: state.puzzle.table.length };
+}
+
+function renderCoach(): void {
+  const el = $('#coach');
+  document.body.classList.toggle('coaching', state.coach !== null);
+  if (!state.coach) {
+    el.hidden = true;
+    spotlightCoachTarget();
+    return;
+  }
+  const step = T.step(state.coach, runContext());
+  const index = T.STEP_ORDER.indexOf(step.id) + 1;
+  const actions =
+    step.id === 'done'
+      ? '<button class="btn primary" data-coach="daily">Play today\'s puzzle</button>' +
+        '<button class="btn ghost" data-coach="practice">Practice: Beginner</button>'
+      : step.next
+        ? '<button class="btn primary" data-coach="next">Next</button>'
+        : '';
+  el.hidden = false;
+  el.innerHTML =
+    `<div class="coach-head"><span class="coach-step">Step ${index} of ${T.STEP_ORDER.length}</span>` +
+    (step.id === 'done' ? '' : '<button class="coach-skip" data-coach="skip">Skip tutorial</button>') +
+    `</div><h2>${step.title}</h2><p>${step.body}</p>` +
+    (actions ? `<div class="coach-actions">${actions}</div>` : '');
+  spotlightCoachTarget();
+  if (scrolledToStep !== step.id) {
+    scrolledToStep = step.id;
+    const target = step.target ? document.querySelector(step.target) : null;
+    target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+/** Re-applied after every circuit render, since the SVG is rebuilt. */
+function spotlightCoachTarget(): void {
+  document.querySelectorAll('.coach-target').forEach((el) => el.classList.remove('coach-target'));
+  const selector = state.coach ? T.step(state.coach, runContext()).target : null;
+  if (selector) document.querySelector(selector)?.classList.add('coach-target');
+}
+
+function endTutorial(next: PlayMode): void {
+  store.set(TUTORIAL_DONE_KEY, true);
+  if (next === 'practice') practiceDifficulty = 'Beginner';
+  switchMode(next);
+}
+
+function startTutorial(): void {
+  scrolledToStep = null;
+  loadTutorial();
+  render();
+  window.scrollTo({ top: 0 });
 }
 
 // ---------- stats ----------
@@ -694,14 +787,16 @@ function newPractice(): void {
   render();
 }
 
-function switchMode(mode: Mode): void {
+function switchMode(mode: PlayMode): void {
   if (mode === state.mode) return;
+  // Leaving the tutorial any way counts as finishing it, so it won't reappear.
+  if (state.mode === 'tutorial') store.set(TUTORIAL_DONE_KEY, true);
   if (mode === 'daily') loadDaily();
   else loadPractice();
   render();
 }
 
-const isMode = (v: string | undefined): v is Mode => v === 'daily' || v === 'practice';
+const isMode = (v: string | undefined): v is PlayMode => v === 'daily' || v === 'practice';
 const isDifficulty = (v: string | undefined): v is Difficulty =>
   v !== undefined && (L.DIFFICULTIES as readonly string[]).includes(v);
 
@@ -778,6 +873,16 @@ function bind(): void {
     saveHelper();
   });
   $('#btn-help').addEventListener('click', () => $<HTMLDialogElement>('#dlg-help').showModal());
+  $('#btn-tutorial').addEventListener('click', () => {
+    $<HTMLDialogElement>('#dlg-help').close();
+    startTutorial();
+  });
+  $('#coach').addEventListener('click', (e: MouseEvent) => {
+    const action = closestData(e.target, 'coach')?.dataset.coach;
+    if (action === 'next') coachEvent({ kind: 'next' });
+    else if (action === 'skip' || action === 'daily') endTutorial('daily');
+    else if (action === 'practice') endTutorial('practice');
+  });
   $('#btn-stats').addEventListener('click', openStats);
   $('#btn-settings').addEventListener('click', () => $<HTMLDialogElement>('#dlg-settings').showModal());
   $<HTMLInputElement>('#set-contrast').addEventListener('change', (e: Event) => {
@@ -815,11 +920,9 @@ function renderGateRef(): void {
 }
 
 applySettings();
-loadDaily();
+// First-time players start with the guided warm-up instead of a wall of rules.
+if (store.get<boolean>(TUTORIAL_DONE_KEY, false, isTrue)) loadDaily();
+else loadTutorial();
 bind();
 renderGateRef();
 render();
-if (!store.get<boolean>(SEEN_HELP_KEY, false, isTrue)) {
-  store.set(SEEN_HELP_KEY, true);
-  $<HTMLDialogElement>('#dlg-help').showModal();
-}
