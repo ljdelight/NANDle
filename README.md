@@ -1,70 +1,83 @@
-# Nandle
+# NANDle
 
-A daily logic-design puzzle in the spirit of Wordle and Quartiles. A hidden
-circuit of two-input gates drives the output **Q**, and you can see its truth
-table. Fill each gate slot with AND, OR, XOR, NAND, NOR or XNOR and find a
-circuit that produces the table within **6 runs**.
+A daily logic-design puzzle in the spirit of Wordle, built to teach how logic
+gates work to people who have never seen one.
 
-After each run:
+**Play it:** https://ljdelight.github.io/NANDle/
 
-- each slot is coloured Wordle-style: 🟩 right gate in the right slot,
-  🟨 that gate is used in another slot, ⬛ not used;
-- the truth table shows, row by row, where your circuit's output was right.
+A hidden circuit of two-input gates drives an output **Q**, and you can see its
+**truth table**: the value of Q for every combination of the inputs. Fill each
+gate slot with AND, OR, XOR, NAND, NOR or XNOR, and build a circuit that
+produces the same table within **6 runs**.
 
-Wondering why a run was wrong? Tap any cell in its truth-table row to
-**trace** it. The circuit switches to that run's gates at that column's
-inputs, shows each gate's output as a 1 or 0, and explains how its Q compares
-with the target. Tapping a cell in the input or Q rows just moves the inputs to
-that column.
+## How a run is scored
 
-Not sure what a gate does? Tap the **ⓘ** on any gate button, or long-press it,
-for a **gate card**: its rule, an everyday analogy, its own truth table and a
-live one-gate circuit to try with A and B. "Use in gate N" drops it into the
-selected slot. The gate list in the help dialog opens the same cards.
+- Each gate slot is scored Wordle-style: **right gate, right slot** (green, with
+  a ✓), **used in another slot** (yellow, with a dashed ring), or **not used**
+  (gray).
+- The truth table gets a row for the run, marking which columns your circuit got
+  right. Misses get a dashed outline.
+- **Any** circuit that matches the whole table wins, even one that differs from
+  the hidden circuit. When more than one circuit works, the header says so
+  (e.g. "2 answers work").
 
-Under the circuit, a live **formula** writes your circuit in Boolean algebra
-as you build it, e.g. `Q = ¬(A · B) ⊕ (B + C)`. Here `·` is AND, `+` is OR,
-`⊕` is XOR and `¬` is NOT. Empty slots show as `?`, and tapping part of the
-formula selects that gate.
+## Learning aids
 
-Stuck? Open the **K-map helper** for a Karnaugh map of the target output. It
-can group the 1s (minimal sum of products) or the 0s (minimal product of sums),
-showing each group in the same colour as its term in the expression. It can also
-mark the cells your last run got wrong, and it points out pure XOR/XNOR
-checkerboards.
+- **Tutorial.** First-time players get a one-gate warm-up. It walks through
+  flipping an input, reading the truth table, a deliberately wrong first try and
+  its feedback, then the solve. It can be skipped, and replayed from the help
+  dialog.
+- **Live probing.** Tap the inputs (or press `A`–`D`) at any time to set them.
+  Lit wires carry a 1, every gate shows its output as a 1 or 0, the matching
+  truth-table column is outlined, and Q shows the wanted value with a ✓ or ✗.
+- **Live formula.** Under the circuit, your circuit is written in Boolean
+  algebra as you build it, e.g. `Q = ¬(A · B) ⊕ (B + C)`. Empty slots show as
+  `?`, and tapping part of the formula selects that gate.
+- **Gate cards.** Tap the **ⓘ** on a gate button, or long-press it, to open a
+  card with the gate's rule, an everyday analogy, a pronunciation hint where the
+  name needs one, its truth table and a live one-gate circuit to try. "Use in
+  gate N" places it.
+- **Row trace.** Tap a cell in a run's truth-table row to see how that run got
+  that column. The circuit switches to the run's gates at those inputs and
+  explains how its Q compares with the target. Escape or any edit goes back to
+  editing.
+- **K-map helper.** A Karnaugh map of the target, which can group the 1s (sum of
+  products) or the 0s (product of sums). Each group matches its term in the
+  expression by color and by dash pattern, and hovering a term spotlights its
+  group. It can mark the cells your last run got wrong, and it points out XOR
+  checkerboards.
+- **Glossary.** Jargon such as "truth table", "K-map" and "sum of products" has a
+  dotted underline; tap it for a short definition. The help dialog lists them all.
 
-Any circuit that matches the whole truth table wins, even one that differs
-from the hidden circuit. Once a game ends you can tap the inputs to probe the
-circuit and watch the signals travel through the wires.
+## Levels
 
-| Level    | Circuit                  | Gate palette                    | Daily on      |
-| -------- | ------------------------ | ------------------------------- | ------------- |
-| Beginner | 2 gates, 3 inputs        | AND, OR, XOR                    | Monday        |
-| Easy     | 2 gates, 3 inputs        | AND, OR, NAND, NOR              | Tuesday       |
-| Medium   | 3 gates, 3 inputs        | all six                         | Wed, Thu      |
-| Hard     | 3 gates, 4 inputs        | all six                         | Fri, Sun      |
-| Expert   | 4 gates, 4 inputs        | all six                         | Saturday      |
+Practice mode serves unlimited puzzles at any level. Daily puzzles are seeded
+from the local date and ramp up through the week.
 
-**Settings (⚙)** has a high-contrast mode for colour-blind players. It uses
-orange and blue tiles (🟧🟦 in shared results) and purple for mistakes in place
-of red, and it switches on automatically if the OS asks for more contrast.
-Feedback never relies on colour alone, in any mode:
+| Level    | Circuit           | Gates you can pick  | Daily on |
+| -------- | ----------------- | ------------------- | -------- |
+| Beginner | 2 gates, 3 inputs | AND, OR, XOR        | Monday   |
+| Easy     | 2 gates, 3 inputs | AND, OR, NAND, NOR  | Tuesday  |
+| Medium   | 3 gates, 3 inputs | all six             | Wed, Thu |
+| Hard     | 3 gates, 4 inputs | all six             | Fri, Sun |
+| Expert   | 4 gates, 4 inputs | all six             | Saturday |
 
-- right-slot tiles carry a ✓, and "used elsewhere" tiles have a dashed ring;
-- truth-table misses get a dashed outline, and Q shows ✓/✗;
-- each K-map group's dash pattern matches its term's underline, and hovering or
-  tapping a term spotlights its group.
+Daily progress, stats and streaks are kept in `localStorage`, and results can be
+shared as a spoiler-free emoji grid.
 
-Text and tile colours meet WCAG AA contrast (4.5:1) in both themes.
+## Accessibility
 
-Daily puzzles are seeded from the local date. Practice mode serves unlimited
-random puzzles at any level. Progress and
-stats are kept in `localStorage`.
-
-First-time players start with a short **tutorial**: a one-gate warm-up that
-walks through flipping an input, reading the truth table, a deliberately wrong
-first try and how to read its feedback, then the solve. It can be skipped, and
-replayed from the help dialog.
+- **Settings (⚙)** has a high-contrast mode for color-blind players: orange and
+  blue tiles (🟧🟦 in shared results) and purple for mistakes in place of red. It
+  switches on automatically if the operating system asks for more contrast.
+- No feedback relies on color alone, in any mode: tiles carry a ✓ or a dashed
+  ring, truth-table misses are outlined, Q shows ✓/✗, gates show their values as
+  digits, and K-map groups match their terms by dash pattern.
+- Text and tile colors meet WCAG AA contrast (4.5:1) in both light and dark
+  themes.
+- Everything works from the keyboard: `1`–`6` pick gates, arrow keys move
+  between slots, `Backspace` clears, `Enter` runs, `A`–`D` toggle inputs and
+  `Escape` leaves a trace.
 
 ## Development
 
@@ -77,10 +90,32 @@ Requires Node 24; the version is pinned in `.nvmrc`, so `nvm use` picks it up.
 nvm use
 npm install
 npm run dev        # local dev server
-npm test           # unit tests for the puzzle logic
+npm test           # unit tests
 npm run typecheck  # tsc --noEmit
 npm run build      # typecheck + production build into dist/
 ```
+
+## Project layout
+
+Logic modules have no DOM access and are unit-tested; `src/ui/` holds the page.
+
+- `src/logic.ts`: gates, circuit shapes, truth tables, puzzle generation and scoring
+- `src/circuit.ts`: SVG schematic layout and rendering
+- `src/expr.ts`: the Boolean formula for a circuit
+- `src/kmap.ts` / `src/kmapView.ts`: K-map layout, minimization (Quine–McCluskey) and its SVG
+- `src/gates.ts`: beginner descriptions and truth tables for each gate
+- `src/glossary.ts`: definitions for the game's jargon
+- `src/tutorial.ts`: the tutorial's steps and how player actions move through them
+- `src/share.ts`: the shareable result text
+- `src/main.ts`: entry point; wires page events to the UI modules
+- `src/ui/state.ts`: the game in progress, loading puzzles and daily saves
+- `src/ui/render.ts`: draws the puzzle page from the state
+- `src/ui/actions.ts`: what the player can do (place gates, run, probe, trace, switch modes)
+- `src/ui/coach.ts`, `helper.ts`, `gateCard.ts`, `glossary.ts`, `stats.ts`, `sharing.ts`:
+  the tutorial card, K-map helper, gate cards, glossary popover, stats dialog and sharing
+- `src/ui/prefs.ts`, `storage.ts`, `dom.ts`: saved preferences, `localStorage` access and DOM helpers
+- `src/style.css`: styles, including the dark and high-contrast themes
+- `test/`: Vitest tests for the logic modules
 
 ## Hosting on GitHub Pages
 
@@ -89,22 +124,5 @@ push to `main` it also deploys `dist/` to GitHub Pages. Vite builds with a
 relative base (`./`), so the site works at `https://<user>.github.io/<repo>/`
 with no configuration.
 
-One-time setup, done by you:
-
-1. Create the GitHub repository and push `main`.
-2. In the repo, go to **Settings → Pages → Build and deployment** and set
-   **Source** to **GitHub Actions**.
-3. Push to `main` (or run the workflow from the **Actions** tab). The deploy
-   job's summary shows the site URL.
-
-## Layout
-
-- `src/logic.ts`: gates, circuit topologies, truth tables, puzzle generation, scoring (no DOM)
-- `src/circuit.ts`: SVG schematic layout and rendering
-- `src/gates.ts`: beginner-facing gate descriptions and per-gate truth tables (no DOM)
-- `src/expr.ts`: Boolean-expression tree and formatting for the live formula (no DOM)
-- `src/kmap.ts`: Karnaugh-map layout, Quine–McCluskey minimisation, parity detection (no DOM)
-- `src/kmapView.ts`: K-map SVG and coloured expression rendering
-- `src/main.ts`: game state, UI, keyboard input, persistence, sharing
-- `src/style.css`: styles, including the dark theme
-- `test/`: Vitest tests for the logic, the formula and the K-map minimiser
+One-time setup: in the repository, go to **Settings → Pages → Build and
+deployment** and set **Source** to **GitHub Actions**.

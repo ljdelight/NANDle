@@ -1,4 +1,4 @@
-// Karnaugh-map helpers: Gray-code layout, Quine–McCluskey minimisation and a
+// Karnaugh-map helpers: Gray-code layout, Quine–McCluskey minimization and a
 // parity (XOR checkerboard) detector. Pure logic, no DOM.
 import type { Bit, InputName } from './logic';
 

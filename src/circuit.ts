@@ -4,7 +4,7 @@ import type { Bit, Gate, InputName, Topology } from './logic';
 
 const GW = 64; // gate box width
 const GH = 48; // gate box height
-const PIN = 12; // pin offset from gate centre
+const PIN = 12; // pin offset from gate center
 const PAD_T = 30;
 const WIRE_X = 52; // where input wires start
 
@@ -133,7 +133,7 @@ export interface RenderOptions {
   readonly interactive: boolean;
   /** Inputs are clickable toggles. */
   readonly probe: boolean;
-  /** Live signal values; wires with a known value are coloured. */
+  /** Live signal values; wires with a known value are colored. */
   readonly values: SignalValues;
   /** Target output for the current inputs, shown beside Q; null to hide. */
   readonly target: Bit | null;
@@ -213,7 +213,7 @@ export function render(topo: Topology, opts: RenderOptions): string {
     }
     inner += `<text class="slot-num" x="${GW / 2}" y="${GH + 16}" text-anchor="middle">${gate.index + 1}</text>`;
     // The gate's output as a digit, tucked between body and pin so it never sits on a
-    // wire, letting a signal be followed without relying on colour.
+    // wire, letting a signal be followed without relying on color.
     const v = opts.values[gateKey(gate.index)];
     if (type && v !== undefined) {
       inner += `<text class="gate-val${v ? ' hi' : ' lo'}" x="${GW}" y="${24 - 8}" text-anchor="end">${v}</text>`;
@@ -230,7 +230,7 @@ export function render(topo: Topology, opts: RenderOptions): string {
   );
   if (opts.target !== null) {
     const verdict = outV === undefined ? '' : outV === opts.target ? ' match' : ' mismatch';
-    // A symbol as well as a colour, so the verdict doesn't rely on colour vision.
+    // A symbol as well as a color, so the verdict doesn't rely on color vision.
     const mark = outV === undefined ? '' : outV === opts.target ? ' ✓' : ' ✗';
     parts.push(
       `<text class="target-note${verdict}" x="${L.out.x + 12}" y="${L.out.y + 30}" text-anchor="middle">want ${opts.target}${mark}</text>`

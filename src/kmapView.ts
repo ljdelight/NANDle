@@ -1,5 +1,5 @@
 // Karnaugh-map rendering: an SVG grid with group outlines, plus the matching
-// coloured expression as HTML.
+// colored expression as HTML.
 import * as K from './kmap';
 import type { Form, Implicant, KMapLayout } from './kmap';
 import type { Bit, InputName } from './logic';
@@ -104,7 +104,7 @@ function literalHtml(l: K.Literal): string {
 }
 
 /**
- * Expression with each term coloured and underlined like its group outline.
+ * Expression with each term colored and underlined like its group outline.
  * Terms are focusable and carry data-group so hovering can spotlight a group.
  */
 export function expressionHtml(groups: readonly Implicant[], inputs: readonly InputName[], form: Form): string {

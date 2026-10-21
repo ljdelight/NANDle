@@ -8,7 +8,7 @@
   --wire: #6b7078;
   --accent: #2f6fde;
   --hi: #e8a317;
-  /* Result colours. Every --on-* text colour is checked against its fill for
+  /* Result colors. Every --on-* text color is checked against its fill for
      WCAG AA (4.5:1); --hit-ink and --miss are also used as text on --surface. */
   --correct: #2e7d4f;
   --present: #c9a227;
@@ -61,7 +61,7 @@
   }
 }
 
-/* High-contrast palette for colour-blind players: orange/blue results (as in
+/* High-contrast palette for color-blind players: orange/blue results (as in
    Wordle's mode) and a reddish purple for mistakes instead of red. Declared
    after the dark theme so it wins in both themes. */
 :root[data-contrast='high'] {
@@ -742,7 +742,7 @@ circle.junction.hi {
   background: color-mix(in srgb, var(--miss) 22%, transparent);
   color: var(--miss);
   font-weight: 800;
-  /* Shape cue, so a miss doesn't rely on colour alone. */
+  /* Shape cue, so a miss doesn't rely on color alone. */
   outline: 1.5px dashed var(--miss);
   outline-offset: -3px;
 }
@@ -904,7 +904,7 @@ circle.junction.hi {
 }
 
 /* Groups and their terms share a dash/underline style, so they can be matched
-   without telling colours apart. Hovering a term spotlights its group. */
+   without telling colors apart. Hovering a term spotlights its group. */
 .kgroup.g1 { stroke-dasharray: 10 5; }
 .kgroup.g2 { stroke-dasharray: 2 4; stroke-linecap: round; }
 .kgroup.g3 { stroke-dasharray: 14 4 2 4; }
@@ -1001,8 +1001,8 @@ circle.junction.hi {
   color: var(--on-absent);
 }
 
-/* Shape cues, so results don't rely on colour alone (e.g. in greyscale):
-   a tick for the right slot, a dashed ring for "used in another slot". */
+/* Shape cues, so results don't rely on color alone (e.g. in grayscale):
+   a checkmark for the right slot, a dashed ring for "used in another slot". */
 .tile {
   position: relative;
 }
@@ -1137,6 +1137,69 @@ circle.junction.hi {
 
 .ref-row b {
   font-family: var(--mono);
+}
+
+/* ---------- glossary ---------- */
+
+/* A tappable term: looks like text with a dotted underline. */
+.gloss {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  text-decoration: underline dotted;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+
+.gloss:hover,
+.gloss:focus-visible {
+  text-decoration-color: var(--accent);
+  text-decoration-style: solid;
+}
+
+.glossary-pop {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1.5px solid var(--accent);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.3);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.gp-name {
+  margin: 0 0 4px;
+  font-weight: 800;
+}
+
+.gp-def {
+  margin: 0;
+}
+
+.glossary-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.glossary-list dt {
+  font-weight: 700;
+}
+
+.glossary-list dd {
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 0.9rem;
 }
 
 /* ---------- gate card ---------- */

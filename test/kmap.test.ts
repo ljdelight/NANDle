@@ -7,7 +7,7 @@ import type { Bit, InputName, TopologyId } from '../src/logic';
 const ABC: readonly InputName[] = ['A', 'B', 'C'];
 const ABCD: readonly InputName[] = ['A', 'B', 'C', 'D'];
 
-/** Evaluates a minimised expression back into a truth table. */
+/** Evaluates a minimized expression back into a truth table. */
 function expand(groups: readonly K.Implicant[], n: number, form: Form): Bit[] {
   const out: Bit[] = [];
   for (let m = 0; m < 1 << n; m++) {
