@@ -53,7 +53,7 @@ function renderMeta(): void {
     `<span class="meta-title">${title}</span>` +
     `<span class="pill diff-${p.difficulty.toLowerCase()}">${p.difficulty}</span>` +
     `<span class="meta-sub">${plural(state.topo.gates.length, 'gate')} · ${plural(state.topo.inputs.length, 'input')}${palette}${others}</span>` +
-    `<span class="meta-runs">Run ${Math.min(state.guesses.length + 1, MAX_RUNS)}/${MAX_RUNS}</span>`;
+    `<span class="meta-runs">${isPlaying() ? `Run ${state.guesses.length + 1}/${MAX_RUNS}` : `${state.guesses.length}/${MAX_RUNS} runs`}</span>`;
 }
 
 function probeValues(): SignalValues {

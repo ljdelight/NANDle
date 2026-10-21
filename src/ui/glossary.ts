@@ -39,6 +39,9 @@ function hideTerm(): void {
 
 export function bindGlossary(): void {
   const pop = $('#glossary-pop');
+  // Older browsers without the Popover API just don't get popovers; the help
+  // dialog's full glossary list still works there.
+  if (typeof pop.showPopover !== 'function') return;
   // Terms appear all over (cards, dialogs, the coach), so listen at the top. The
   // popover is "manual" so tapping the same term again can close it.
   document.addEventListener('click', (e: MouseEvent) => {

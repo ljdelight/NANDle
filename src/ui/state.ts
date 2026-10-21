@@ -101,7 +101,9 @@ export function loadDaily(): void {
   if (saved && saved.topoId === puzzle.topoId && saved.guesses.every(fits)) {
     state.guesses = saved.guesses.map(makeGuess);
     state.status = saved.status;
+    const last = state.guesses[state.guesses.length - 1];
     if (state.status !== 'playing') finishBoard();
+    else if (last) keepCorrectGates(last);
   }
 }
 
@@ -123,6 +125,13 @@ export function saveDaily(): void {
     status: state.status,
   };
   store.set(KEYS.daily(state.puzzle.dateKey), saved);
+}
+
+/** Before the next run, keep the gates the last run placed correctly. */
+export function keepCorrectGates(guess: Guess): void {
+  state.current = guess.gates.map((g, i): Gate | null => (guess.score[i] === 'correct' ? g : null));
+  const firstEmpty = state.current.findIndex((g) => !g);
+  state.selected = firstEmpty === -1 ? 0 : firstEmpty;
 }
 
 /** After a game ends, show the winning circuit or, on a loss, the hidden one. */

@@ -14,15 +14,22 @@ interface Stats {
   dist: number[];
 }
 
+const isCount = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 0;
+const isPuzzleRef = (v: unknown): v is number | null => v === null || typeof v === 'number';
+
+/** Stored stats are rendered as HTML, so every field is checked, not just its presence. */
 function isStats(v: unknown): v is Stats {
   return (
     isRecord(v) &&
-    typeof v.played === 'number' &&
-    typeof v.won === 'number' &&
-    typeof v.streak === 'number' &&
-    typeof v.maxStreak === 'number' &&
+    isCount(v.played) &&
+    isCount(v.won) &&
+    isCount(v.streak) &&
+    isCount(v.maxStreak) &&
+    isPuzzleRef(v.lastNumber ?? null) &&
+    isPuzzleRef(v.lastWonNumber ?? null) &&
     Array.isArray(v.dist) &&
-    v.dist.length === MAX_RUNS
+    v.dist.length === MAX_RUNS &&
+    v.dist.every(isCount)
   );
 }
 

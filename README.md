@@ -79,6 +79,13 @@ shared as a spoiler-free emoji grid.
   between slots, `Backspace` clears, `Enter` runs, `A`–`D` toggle inputs and
   `Escape` leaves a trace.
 
+## Browser support
+
+Current versions of Chrome, Edge, Firefox and Safari, on desktop and mobile.
+Glossary popovers need the Popover API (Safari 17+, Firefox 125+); in older
+browsers the terms show as plain text and the help dialog's glossary list still
+works.
+
 ## Development
 
 Written in strict TypeScript, bundled with Vite and tested with Vitest. It has

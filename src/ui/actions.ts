@@ -8,6 +8,7 @@ import {
   MAX_RUNS,
   filledGates,
   finishBoard,
+  keepCorrectGates,
   loadDaily,
   loadPractice,
   loadTutorial,
@@ -90,10 +91,7 @@ export function run(): void {
   else if (state.guesses.length >= MAX_RUNS) state.status = 'lost';
 
   if (state.status === 'playing') {
-    // Keep the correct gates in place for the next attempt.
-    state.current = guess.gates.map((g, i): Gate | null => (guess.score[i] === 'correct' ? g : null));
-    const firstEmpty = state.current.findIndex((g) => !g);
-    state.selected = firstEmpty === -1 ? 0 : firstEmpty;
+    keepCorrectGates(guess);
   } else {
     finishBoard();
     recordStats();

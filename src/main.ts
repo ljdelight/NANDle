@@ -43,12 +43,14 @@ function bindCircuit(): void {
   });
   circuit.addEventListener('keydown', (e: KeyboardEvent) => {
     if (e.key !== ' ' && e.key !== 'Enter') return;
+    // Handled here so the page-wide "Enter = run" shortcut doesn't also fire.
+    const slot = closestData(e.target, 'slot');
     const input = closestData(e.target, 'input');
-    if (input?.dataset.input) {
-      e.preventDefault();
-      e.stopPropagation();
-      toggleInput(input.dataset.input);
-    }
+    if (slot) selectSlot(Number(slot.dataset.slot));
+    else if (input?.dataset.input) toggleInput(input.dataset.input);
+    else return;
+    e.preventDefault();
+    e.stopPropagation();
   });
   $('#truth-table').addEventListener('click', (e: MouseEvent) => {
     const cell = closestData(e.target, 'col');
