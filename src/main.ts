@@ -44,6 +44,8 @@ interface GameState {
   probe: Bit[];
   /** Current tutorial step; null outside the tutorial. */
   coach: StepId | null;
+  /** Index of the past run being traced in the circuit view; null when editing. */
+  trace: number | null;
 }
 
 interface SavedDaily {
@@ -196,6 +198,7 @@ function startGame(mode: Mode, puzzle: Puzzle | DailyPuzzle): void {
     status: 'playing',
     probe: topo.inputs.map((): Bit => 0),
     coach: null,
+    trace: null,
   };
 }
 
@@ -283,8 +286,14 @@ function renderMeta(): void {
     `<span class="meta-runs">Run ${Math.min(state.guesses.length + 1, MAX_RUNS)}/${MAX_RUNS}</span>`;
 }
 
+/** The gates on show: a traced past run, or the circuit being built. */
+function shownGates(): readonly (Gate | null)[] {
+  const traced = state.trace === null ? undefined : state.guesses[state.trace];
+  return traced ? traced.gates : state.current;
+}
+
 function probeValues(): SignalValues {
-  const nodes = L.evaluatePartial(state.topo, state.current, state.probe);
+  const nodes = L.evaluatePartial(state.topo, shownGates(), state.probe);
   const values: SignalValues = { ...nodes.inputs };
   nodes.gates.forEach((v, i) => {
     if (v !== null) values[`g${i}`] = v;
@@ -294,16 +303,18 @@ function probeValues(): SignalValues {
 
 function renderCircuit(): void {
   const playing = state.status === 'playing';
+  const editing = playing && state.trace === null;
+  renderTraceBar();
   $('#circuit').innerHTML = C.render(state.topo, {
-    gates: state.current,
-    selected: playing ? state.selected : null,
-    interactive: playing,
+    gates: shownGates(),
+    selected: editing ? state.selected : null,
+    interactive: editing,
     probe: true,
     values: probeValues(),
     target: state.puzzle.table[L.rowIndex(state.probe)] ?? null,
     compact: narrowScreen.matches,
   });
-  renderFormula(playing ? state.selected : null);
+  renderFormula(editing ? state.selected : null);
   spotlightCoachTarget();
   const names = state.topo.inputs;
   $('#circuit-hint').textContent = playing
@@ -311,8 +322,37 @@ function renderCircuit(): void {
     : 'Tap the inputs to probe the circuit.';
 }
 
+function renderTraceBar(): void {
+  const bar = $('#trace-bar');
+  const traced = state.trace === null ? undefined : state.guesses[state.trace];
+  bar.hidden = !traced;
+  if (!traced || state.trace === null) return;
+  const row = L.rowIndex(state.probe);
+  const inputs = state.topo.inputs.map((name, i) => `${name}=${state.probe[i]}`).join(', ');
+  const got = traced.table[row];
+  const want = state.puzzle.table[row];
+  const verdict =
+    got === want
+      ? `gives <b>Q=${got}</b>, matching the target.`
+      : `gives <b>Q=${got}</b>, but the target is <b>${want}</b>. Follow the 1s and 0s to find where it goes wrong.`;
+  bar.className = 'trace-bar ' + (got === want ? 'match' : 'mismatch');
+  bar.innerHTML =
+    `<p><b>Run #${state.trace + 1}</b> at ${inputs} ${verdict}</p>` +
+    `<button class="btn small" data-action="end-trace">${isPlaying() ? 'Back to editing' : 'Back'}</button>`;
+}
+
+const isPlaying = (): boolean => state.status === 'playing';
+
+/** Stops tracing; returns whether a trace was showing. */
+function leaveTrace(): boolean {
+  if (state.trace === null) return false;
+  state.trace = null;
+  renderTable();
+  return true;
+}
+
 function renderFormula(selected: number | null): void {
-  const expr = E.circuitExpr(state.topo, state.current);
+  const expr = E.circuitExpr(state.topo, shownGates());
   $('#formula').innerHTML = `<span class="fx-q">Q =</span> ${E.exprHtml(expr, selected)}`;
 }
 
@@ -353,6 +393,8 @@ interface TableCell {
   readonly text: string;
   readonly cls?: string;
   readonly title?: string;
+  /** Past run this cell belongs to; tapping it traces that run. */
+  readonly run?: number;
 }
 
 function renderTable(): void {
@@ -364,7 +406,8 @@ function renderTable(): void {
       const c = cell(r);
       const classes = [c.cls ?? '', r === probeRow ? 'probe' : ''].filter(Boolean).join(' ');
       const title = c.title ? ` title="${c.title}"` : '';
-      return `<td${classes ? ` class="${classes}"` : ''}${title}>${c.text}</td>`;
+      const runAttr = c.run === undefined ? '' : ` data-run="${c.run}"`;
+      return `<td${classes ? ` class="${classes}"` : ''}${title} data-col="${r}"${runAttr}>${c.text}</td>`;
     });
     return `<tr class="${cls}"><th scope="row">${head}</th>${tds.join('')}</tr>`;
   };
@@ -374,9 +417,15 @@ function renderTable(): void {
   });
   html += row('target', 'Q', (r) => ({ text: String(target[r]), cls: `v${target[r]}` }));
   state.guesses.forEach((g, gi) => {
-    html += row('guess', `#${gi + 1}`, (r) => {
+    const traced = state.trace === gi ? ' traced' : '';
+    html += row(`guess${traced}`, `#${gi + 1}`, (r) => {
       const ok = g.table[r] === target[r];
-      return { text: String(g.table[r]), cls: ok ? 'hit' : 'miss', title: ok ? 'matches' : 'wrong' };
+      return {
+        text: String(g.table[r]),
+        cls: ok ? 'hit' : 'miss',
+        title: ok ? 'Matches. Tap to trace this run here.' : 'Wrong. Tap to trace how this run got it.',
+        run: gi,
+      };
     });
   });
   html += '</tbody></table>';
@@ -502,6 +551,7 @@ function renderResult(): void {
 
 function selectSlot(i: number): void {
   if (state.status !== 'playing') return;
+  leaveTrace();
   const count = state.current.length;
   state.selected = ((i % count) + count) % count;
   renderCircuit();
@@ -515,6 +565,7 @@ function refreshPlay(): void {
 
 function placeGate(type: Gate): void {
   if (state.status !== 'playing' || !state.puzzle.gates.includes(type)) return;
+  leaveTrace();
   state.current[state.selected] = type;
   // Advance to the next empty slot, or stay put if the circuit is full.
   const count = state.current.length;
@@ -531,6 +582,7 @@ function placeGate(type: Gate): void {
 
 function clearSlot(): void {
   if (state.status !== 'playing') return;
+  leaveTrace();
   if (state.current[state.selected]) state.current[state.selected] = null;
   else selectSlot(state.selected - 1);
   refreshPlay();
@@ -538,6 +590,7 @@ function clearSlot(): void {
 
 function clearAll(): void {
   if (state.status !== 'playing') return;
+  leaveTrace();
   state.current = state.current.map((): Gate | null => null);
   state.selected = 0;
   render();
@@ -545,6 +598,7 @@ function clearAll(): void {
 
 function run(): void {
   if (state.status !== 'playing') return;
+  leaveTrace();
   const gates = filledGates(state.current);
   if (!gates) {
     toast('Fill every gate slot first');
@@ -867,6 +921,22 @@ function bind(): void {
       toggleInput(input.dataset.input);
     }
   });
+  $('#truth-table').addEventListener('click', (e: MouseEvent) => {
+    const cell = closestData(e.target, 'col');
+    if (!cell) return;
+    // Jump the circuit's inputs to this column; a run's cell also traces that run.
+    state.probe = L.rowBits(Number(cell.dataset.col), state.topo.inputs.length);
+    const traced = cell.dataset.run;
+    state.trace = traced === undefined ? null : Number(traced);
+    renderCircuit();
+    renderTable();
+    // On a phone the circuit is usually scrolled away by the time you reach the table.
+    const card = $('.circuit-card');
+    if (card.getBoundingClientRect().top < 0) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  $('#trace-bar').addEventListener('click', (e: MouseEvent) => {
+    if (closestData(e.target, 'action')?.dataset.action === 'end-trace' && leaveTrace()) renderCircuit();
+  });
   $('#formula').addEventListener('click', (e: MouseEvent) => {
     const part = closestData(e.target, 'fx');
     if (part) selectSlot(Number(part.dataset.fx));
@@ -997,6 +1067,10 @@ function bind(): void {
 
   document.addEventListener('keydown', (e: KeyboardEvent) => {
     if (e.metaKey || e.ctrlKey || e.altKey || document.querySelector('dialog[open]')) return;
+    if (e.key === 'Escape' && leaveTrace()) {
+      renderCircuit();
+      return;
+    }
     if (e.target instanceof Element && e.target.closest('button') && (e.key === 'Enter' || e.key === ' ')) return;
     const n = Number(e.key);
     const gate = Number.isInteger(n) && n >= 1 ? state.puzzle.gates[n - 1] : undefined;

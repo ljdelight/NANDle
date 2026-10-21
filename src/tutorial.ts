@@ -85,7 +85,8 @@ export function step(id: StepId, run: RunContext): Step {
         title: 'Reading the results',
         body:
           `${gate} matched <b>${run.matched} of ${run.rows}</b> columns. The dashed cells are where it was wrong. ` +
-          `Its tile under Attempts is plain grey, meaning ${gate} isn't in the hidden circuit. A ✓ tile would mean the right gate.`,
+          `Its tile under Attempts is plain grey, meaning ${gate} isn't in the hidden circuit. A ✓ tile would mean the right gate. ` +
+          'Tip: tap any dashed cell to trace how your circuit got that column.',
         target: '#truth-table',
         next: true,
       };

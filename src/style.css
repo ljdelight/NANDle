@@ -304,6 +304,46 @@ main {
   font-family: var(--mono);
 }
 
+.trace-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1.5px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  font-size: 0.9rem;
+}
+
+.trace-bar p {
+  margin: 0;
+  flex: 1;
+}
+
+.trace-bar.mismatch {
+  border-color: var(--miss);
+  background: color-mix(in srgb, var(--miss) 10%, transparent);
+}
+
+.trace-bar .btn {
+  flex: none;
+}
+
+.gate-val {
+  font-size: 11px;
+  font-weight: 800;
+  fill: var(--ink-2);
+}
+
+.gate-val.hi {
+  fill: var(--hi);
+}
+
+.circuit-svg.compact .gate-val {
+  font-size: 13px;
+}
+
 .formula {
   margin: 2px 0 0;
   padding: 6px 8px;
@@ -705,6 +745,18 @@ circle.junction.hi {
   /* Shape cue, so a miss doesn't rely on colour alone. */
   outline: 1.5px dashed var(--miss);
   outline-offset: -3px;
+}
+
+.tt td[data-col] {
+  cursor: pointer;
+}
+
+.tt tr.traced th {
+  color: var(--accent);
+}
+
+.tt tr.traced td {
+  box-shadow: inset 0 -2px 0 var(--accent);
 }
 
 .tt td.probe {
@@ -1472,6 +1524,13 @@ body.coaching main {
   .practice-bar {
     flex-direction: column;
     align-items: stretch;
+  }
+  .trace-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .trace-bar .btn {
+    align-self: flex-end;
   }
   .segmented button {
     flex: 1;

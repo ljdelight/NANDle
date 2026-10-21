@@ -194,6 +194,7 @@ export function render(topo: Topology, opts: RenderOptions): string {
     );
   }
 
+
   // Gates.
   for (const gate of L.gates) {
     const type: Gate | null = opts.gates[gate.index] ?? null;
@@ -211,6 +212,12 @@ export function render(topo: Topology, opts: RenderOptions): string {
       inner += `<text class="slot-q" x="${GW / 2}" y="30" text-anchor="middle">?</text>`;
     }
     inner += `<text class="slot-num" x="${GW / 2}" y="${GH + 16}" text-anchor="middle">${gate.index + 1}</text>`;
+    // The gate's output as a digit, tucked between body and pin so it never sits on a
+    // wire, letting a signal be followed without relying on colour.
+    const v = opts.values[gateKey(gate.index)];
+    if (type && v !== undefined) {
+      inner += `<text class="gate-val${v ? ' hi' : ' lo'}" x="${GW}" y="${24 - 8}" text-anchor="end">${v}</text>`;
+    }
     parts.push(`<g class="${cls}" transform="translate(${gate.x} ${gate.cy - GH / 2})"${attrs}>${inner}</g>`);
   }
 

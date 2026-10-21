@@ -11,6 +11,12 @@ After each run:
   🟨 that gate is used in another slot, ⬛ not used;
 - the truth table shows, row by row, where your circuit's output was right.
 
+Wondering why a run was wrong? Tap any cell in its truth-table row to
+**trace** it. The circuit switches to that run's gates at that column's
+inputs, shows each gate's output as a 1 or 0, and explains how its Q compares
+with the target. Tapping a cell in the input or Q rows just moves the inputs to
+that column.
+
 Not sure what a gate does? Tap the **ⓘ** on any gate button, or long-press it,
 for a **gate card**: its rule, an everyday analogy, its own truth table and a
 live one-gate circuit to try with A and B. "Use in gate N" drops it into the
