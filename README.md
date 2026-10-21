@@ -11,6 +11,11 @@ After each run:
   🟨 that gate is used in another slot, ⬛ not used;
 - the truth table shows, row by row, where your circuit's output was right.
 
+Under the circuit, a live **formula** writes your circuit in Boolean algebra
+as you build it, e.g. `Q = ¬(A · B) ⊕ (B + C)`. Here `·` is AND, `+` is OR,
+`⊕` is XOR and `¬` is NOT. Empty slots show as `?`, and tapping part of the
+formula selects that gate.
+
 Stuck? Open the **K-map helper** for a Karnaugh map of the target output. It
 can group the 1s (minimal sum of products) or the 0s (minimal product of sums),
 showing each group in the same colour as its term in the expression. It can also
@@ -68,8 +73,9 @@ One-time setup, done by you:
 
 - `src/logic.ts`: gates, circuit topologies, truth tables, puzzle generation, scoring (no DOM)
 - `src/circuit.ts`: SVG schematic layout and rendering
+- `src/expr.ts`: Boolean-expression tree and formatting for the live formula (no DOM)
 - `src/kmap.ts`: Karnaugh-map layout, Quine–McCluskey minimisation, parity detection (no DOM)
 - `src/kmapView.ts`: K-map SVG and coloured expression rendering
 - `src/main.ts`: game state, UI, keyboard input, persistence, sharing
 - `src/style.css`: styles, including the dark theme
-- `test/`: Vitest tests for the logic and the K-map minimiser
+- `test/`: Vitest tests for the logic, the formula and the K-map minimiser

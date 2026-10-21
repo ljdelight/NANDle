@@ -32,6 +32,7 @@
 
       <section class="card circuit-card">
         <div id="circuit"></div>
+        <p class="formula" id="formula" aria-live="polite"></p>
         <p class="circuit-hint" id="circuit-hint"></p>
       </section>
 
@@ -81,6 +82,7 @@
       <ol>
         <li>Tap a gate slot, then pick a gate. Keys <kbd>1</kbd>–<kbd>6</kbd> pick gates, arrow keys move between slots.</li>
         <li>Tap the inputs (or press <kbd>A</kbd>–<kbd>D</kbd>) to try values and watch them flow through your circuit; the truth table highlights that column and Q shows the wanted output.</li>
+        <li>The formula under the circuit spells it out in Boolean algebra (<code>·</code> AND, <code>+</code> OR, <code>⊕</code> XOR, <code>¬</code> NOT). Tap part of it to select that gate.</li>
         <li>Press <b>Run circuit</b> (<kbd>Enter</kbd>) to test it.</li>
         <li>Each slot gets a colour, and the truth table shows which rows your circuit got right.</li>
         <li>Stuck? Open the <b>K-map helper</b> to see the target as a Karnaugh map, with its simplest groupings.</li>

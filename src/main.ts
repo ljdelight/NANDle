@@ -1,6 +1,7 @@
 // UI wiring: game state, rendering, input handling, persistence and sharing.
 import './style.css';
 import * as C from './circuit';
+import * as E from './expr';
 import type { SignalValues } from './circuit';
 import * as K from './kmap';
 import type { Form } from './kmap';
@@ -272,10 +273,16 @@ function renderCircuit(): void {
     target: state.puzzle.table[L.rowIndex(state.probe)] ?? null,
     compact: narrowScreen.matches,
   });
+  renderFormula(playing ? state.selected : null);
   const names = state.topo.inputs;
   $('#circuit-hint').textContent = playing
     ? `Tap a slot to pick its gate. Tap ${names[0]}–${names[names.length - 1]} to try inputs.`
     : 'Tap the inputs to probe the circuit.';
+}
+
+function renderFormula(selected: number | null): void {
+  const expr = E.circuitExpr(state.topo, state.current);
+  $('#formula').innerHTML = `<span class="fx-q">Q =</span> ${E.exprHtml(expr, selected)}`;
 }
 
 function keyStatus(): Map<Gate, Score> {
@@ -415,6 +422,9 @@ function renderBoard(): void {
     if (g) {
       tiles = g.gates.map((type, k) => `<span class="tile ${g.score[k] ?? ''}">${type}</span>`).join('');
       tail = `<span class="rows">${g.matched}/${totalRows}</span>`;
+      const formula = E.formatExpr(E.circuitExpr(state.topo, g.gates));
+      rows.push(`<li class="board-row" title="Q = ${formula}">${tiles}${tail}</li>`);
+      continue;
     } else if (i === state.guesses.length && state.status === 'playing') {
       tiles = state.current.map((type) => `<span class="tile pending">${type ?? ''}</span>`).join('');
     } else {
@@ -689,6 +699,10 @@ function bind(): void {
       toggleInput(input.dataset.input);
     }
   });
+  $('#formula').addEventListener('click', (e: MouseEvent) => {
+    const part = closestData(e.target, 'fx');
+    if (part) selectSlot(Number(part.dataset.fx));
+  });
   $('#palette').addEventListener('click', (e: MouseEvent) => {
     const gate = closestData(e.target, 'gate')?.dataset.gate;
     if (L.isGate(gate)) placeGate(gate);
@@ -752,7 +766,8 @@ function bind(): void {
 
 function renderGateRef(): void {
   $('#gate-ref').innerHTML = L.GATES.map(
-    (type) => `<div class="ref-row">${C.iconSvg(type)}<b>${type}</b><span>${GATE_INFO[type]}</span></div>`
+    (type) =>
+      `<div class="ref-row">${C.iconSvg(type)}<b>${type}</b><code>${E.gateNotation(type)}</code><span>${GATE_INFO[type]}</span></div>`
   ).join('');
 }
 

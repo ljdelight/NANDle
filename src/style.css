@@ -273,6 +273,43 @@ main {
   font-family: var(--mono);
 }
 
+.formula {
+  margin: 2px 0 0;
+  padding: 6px 8px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.fx-q {
+  color: var(--ink-2);
+  margin-right: 4px;
+}
+
+.fx-op {
+  color: var(--accent);
+}
+
+.fx-op.unknown {
+  color: var(--ink-2);
+  border: 1.5px dashed var(--ink-2);
+  border-radius: 4px;
+  padding: 0 3px;
+}
+
+.fx-gate {
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.fx-gate.selected {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  box-shadow: 0 0 0 1.5px var(--accent);
+}
+
 .circuit-hint {
   margin: 4px 0 0;
   text-align: center;
@@ -843,6 +880,13 @@ circle.junction.hi {
   color: var(--ink-2);
 }
 
+.dialog code {
+  font-family: var(--mono);
+  font-size: 1.05em;
+  font-weight: 700;
+  color: var(--accent);
+}
+
 .dialog ol {
   padding-left: 20px;
 }
@@ -879,9 +923,16 @@ circle.junction.hi {
 
 .ref-row {
   display: grid;
-  grid-template-columns: 48px 54px 1fr;
+  grid-template-columns: 48px 54px 64px 1fr;
+  gap: 4px;
   align-items: center;
   font-size: 0.9rem;
+}
+
+.ref-row code {
+  font-family: var(--mono);
+  color: var(--accent);
+  font-weight: 700;
 }
 
 .ref-row b {
@@ -1036,7 +1087,8 @@ circle.junction.hi {
     font-size: 0.95rem;
   }
   .ref-row {
-    grid-template-columns: 44px 50px 1fr;
+    grid-template-columns: 40px 46px 58px 1fr;
+    font-size: 0.85rem;
   }
 }
 
