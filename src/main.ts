@@ -2,6 +2,7 @@
 import './style.css';
 import * as C from './circuit';
 import * as E from './expr';
+import { GATE_GUIDE, gateTable } from './gates';
 import type { SignalValues } from './circuit';
 import * as K from './kmap';
 import type { Form } from './kmap';
@@ -72,15 +73,6 @@ interface Stats {
   lastWonNumber: number | null;
   dist: number[];
 }
-
-const GATE_INFO: Readonly<Record<Gate, string>> = {
-  AND: '1 only when both inputs are 1',
-  OR: '1 when either input is 1',
-  XOR: '1 when the inputs differ',
-  NAND: 'NOT AND: 0 only when both are 1',
-  NOR: 'NOT OR: 1 only when both are 0',
-  XNOR: 'NOT XOR: 1 when the inputs match',
-};
 
 /** Narrow screens get the compact circuit layout. */
 const narrowScreen: MediaQueryList = window.matchMedia('(max-width: 520px)');
@@ -348,8 +340,11 @@ function renderPalette(): void {
   paletteEl.style.setProperty('--cols', String(state.puzzle.gates.length));
   paletteEl.innerHTML = state.puzzle.gates.map(
     (type, i) =>
-      `<button class="gate-btn ${status.get(type) ?? ''}" data-gate="${type}" title="${type}: ${GATE_INFO[type]}">` +
-      `${C.iconSvg(type)}<span>${type}</span><kbd>${i + 1}</kbd></button>`
+      `<div class="gate-cell">` +
+      `<button class="gate-btn ${status.get(type) ?? ''}" data-gate="${type}" title="${type}: ${GATE_GUIDE[type].rule}">` +
+      `${C.iconSvg(type)}<span>${type}</span><kbd>${i + 1}</kbd></button>` +
+      `<button class="gate-info" data-info="${type}" aria-label="What does ${type} do?" title="What does ${type} do?">i</button>` +
+      `</div>`
   ).join('');
   $<HTMLButtonElement>('#btn-run').disabled = filledGates(state.current) === null;
 }
@@ -598,6 +593,61 @@ function toggleInput(name: string): void {
   if (input) coachEvent({ kind: 'toggle', input, value });
 }
 
+// ---------- gate card ----------
+
+interface GateCard {
+  gate: Gate;
+  a: Bit;
+  b: Bit;
+}
+
+let gateCard: GateCard | null = null;
+
+function openGateCard(gate: Gate): void {
+  gateCard = { gate, a: 0, b: 0 };
+  renderGateCard();
+  const dlg = $<HTMLDialogElement>('#dlg-gate');
+  if (!dlg.open) dlg.showModal();
+}
+
+function renderGateCard(): void {
+  if (!gateCard) return;
+  const { gate, a, b } = gateCard;
+  const out = L.GATE_FN[gate](a, b);
+  const guide = GATE_GUIDE[gate];
+  // A live one-gate circuit, drawn with the same renderer as the puzzle.
+  const circuit = C.render(L.TOPOLOGIES.single, {
+    gates: [gate],
+    selected: null,
+    interactive: false,
+    probe: true,
+    values: { A: a, B: b, g0: out },
+    target: null,
+    compact: narrowScreen.matches,
+  });
+  const rows = gateTable(gate)
+    .map((r) => {
+      const now = r.a === a && r.b === b;
+      return `<tr${now ? ' class="now"' : ''}><td>${r.a}</td><td>${r.b}</td><td class="v${r.out}">${r.out}</td></tr>`;
+    })
+    .join('');
+  const canUse = state.status === 'playing' && state.puzzle.gates.includes(gate);
+  $('#gate-card').innerHTML =
+    `<div class="gc-head">${C.iconSvg(gate)}<div><h2 id="gate-card-title">${gate}</h2>` +
+    (guide.say ? `<span class="gc-say">${guide.say}</span>` : '') +
+    `<code>${E.gateNotation(gate)}</code></div></div>` +
+    `<p class="gc-rule">${guide.rule}.</p>` +
+    `<div class="gc-try"><div class="gc-circuit">${circuit}</div>` +
+    `<table class="gc-tt" aria-label="${gate} truth table"><thead><tr><th>A</th><th>B</th><th>Q</th></tr></thead>` +
+    `<tbody>${rows}</tbody></table></div>` +
+    `<p class="gc-hint">Tap <b>A</b> and <b>B</b> to try it.</p>` +
+    `<p class="gc-analogy"><span aria-hidden="true">💡</span> ${guide.analogy}</p>` +
+    (guide.note ? `<p class="fine">${guide.note}</p>` : '') +
+    (canUse
+      ? `<div class="dialog-actions"><button class="btn primary" data-use="${gate}">Use in gate ${state.selected + 1}</button></div>`
+      : '');
+}
+
 // ---------- tutorial ----------
 
 let scrolledToStep: StepId | null = null;
@@ -821,9 +871,58 @@ function bind(): void {
     const part = closestData(e.target, 'fx');
     if (part) selectSlot(Number(part.dataset.fx));
   });
-  $('#palette').addEventListener('click', (e: MouseEvent) => {
+  const palette = $('#palette');
+  // Long-pressing a gate opens its card instead of placing it.
+  let pressTimer: ReturnType<typeof setTimeout> | undefined;
+  let longPressed = false;
+  palette.addEventListener('pointerdown', (e: PointerEvent) => {
+    const gate = closestData(e.target, 'gate')?.dataset.gate;
+    if (!L.isGate(gate)) return;
+    longPressed = false;
+    pressTimer = setTimeout(() => {
+      longPressed = true;
+      openGateCard(gate);
+    }, 500);
+  });
+  for (const type of ['pointerup', 'pointerleave', 'pointercancel'] as const) {
+    palette.addEventListener(type, () => clearTimeout(pressTimer));
+  }
+  palette.addEventListener('contextmenu', (e: MouseEvent) => {
+    if (closestData(e.target, 'gate')) e.preventDefault();
+  });
+  palette.addEventListener('click', (e: MouseEvent) => {
+    const info = closestData(e.target, 'info')?.dataset.info;
+    if (L.isGate(info)) return openGateCard(info);
+    if (longPressed) {
+      longPressed = false;
+      return;
+    }
     const gate = closestData(e.target, 'gate')?.dataset.gate;
     if (L.isGate(gate)) placeGate(gate);
+  });
+  $('#gate-ref').addEventListener('click', (e: MouseEvent) => {
+    const info = closestData(e.target, 'info')?.dataset.info;
+    if (L.isGate(info)) openGateCard(info);
+  });
+  $('#gate-card').addEventListener('click', (e: MouseEvent) => {
+    if (!gateCard) return;
+    const input = closestData(e.target, 'input')?.dataset.input;
+    if (input === 'A') gateCard.a = gateCard.a ? 0 : 1;
+    else if (input === 'B') gateCard.b = gateCard.b ? 0 : 1;
+    const use = closestData(e.target, 'use')?.dataset.use;
+    if (L.isGate(use)) {
+      $<HTMLDialogElement>('#dlg-gate').close();
+      placeGate(use);
+      return;
+    }
+    if (input) renderGateCard();
+  });
+  $('#gate-card').addEventListener('keydown', (e: KeyboardEvent) => {
+    if (e.key !== ' ' && e.key !== 'Enter') return;
+    const input = closestData(e.target, 'input');
+    if (!input) return;
+    e.preventDefault();
+    input.dispatchEvent(new MouseEvent('click', { bubbles: true }));
   });
   $('#btn-run').addEventListener('click', run);
   $('#btn-clear').addEventListener('click', clearAll);
@@ -915,7 +1014,8 @@ function bind(): void {
 function renderGateRef(): void {
   $('#gate-ref').innerHTML = L.GATES.map(
     (type) =>
-      `<div class="ref-row">${C.iconSvg(type)}<b>${type}</b><code>${E.gateNotation(type)}</code><span>${GATE_INFO[type]}</span></div>`
+      `<button class="ref-row" data-info="${type}">${C.iconSvg(type)}<b>${type}</b>` +
+      `<code>${E.gateNotation(type)}</code><span>${GATE_GUIDE[type].rule}</span></button>`
   ).join('');
 }
 

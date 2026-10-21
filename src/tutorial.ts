@@ -64,7 +64,9 @@ export function step(id: StepId, run: RunContext): Step {
       return {
         id,
         title: 'Pick a gate',
-        body: 'The slot is empty. Try <b>OR</b>: it outputs 1 when <i>either</i> input is 1.',
+        body:
+          'The slot is empty. Try <b>OR</b>: it outputs 1 when <i>either</i> input is 1. ' +
+          '(Tap the <b>ⓘ</b> on any gate to see what it does.)',
         target: '#palette',
         next: false,
       };

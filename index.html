@@ -97,11 +97,17 @@
       </div>
       <p class="fine">Colours compare against one hidden circuit, but <b>any</b> circuit that matches the whole truth table wins. A new daily puzzle arrives at midnight and gets harder through the week.</p>
       <h3>Gates</h3>
+      <p class="fine">Tap a gate below, or the ⓘ on any gate button, to try it out.</p>
       <div class="gate-ref" id="gate-ref"></div>
       <form method="dialog" class="dialog-actions">
         <button class="btn ghost" type="button" id="btn-tutorial">Play the tutorial</button>
         <button class="btn primary">Let's play</button>
       </form>
+    </dialog>
+
+    <dialog id="dlg-gate" class="dialog gate-dialog" aria-labelledby="gate-card-title">
+      <form method="dialog"><button class="close" aria-label="Close">×</button></form>
+      <div id="gate-card"></div>
     </dialog>
 
     <dialog id="dlg-settings" class="dialog">

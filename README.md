@@ -11,6 +11,11 @@ After each run:
   🟨 that gate is used in another slot, ⬛ not used;
 - the truth table shows, row by row, where your circuit's output was right.
 
+Not sure what a gate does? Tap the **ⓘ** on any gate button, or long-press it,
+for a **gate card**: its rule, an everyday analogy, its own truth table and a
+live one-gate circuit to try with A and B. "Use in gate N" drops it into the
+selected slot. The gate list in the help dialog opens the same cards.
+
 Under the circuit, a live **formula** writes your circuit in Boolean algebra
 as you build it, e.g. `Q = ¬(A · B) ⊕ (B + C)`. Here `·` is AND, `+` is OR,
 `⊕` is XOR and `¬` is NOT. Empty slots show as `?`, and tapping part of the
@@ -90,6 +95,7 @@ One-time setup, done by you:
 
 - `src/logic.ts`: gates, circuit topologies, truth tables, puzzle generation, scoring (no DOM)
 - `src/circuit.ts`: SVG schematic layout and rendering
+- `src/gates.ts`: beginner-facing gate descriptions and per-gate truth tables (no DOM)
 - `src/expr.ts`: Boolean-expression tree and formatting for the live formula (no DOM)
 - `src/kmap.ts`: Karnaugh-map layout, Quine–McCluskey minimisation, parity detection (no DOM)
 - `src/kmapView.ts`: K-map SVG and coloured expression rendering

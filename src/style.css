@@ -487,7 +487,46 @@ circle.junction.hi {
   margin: 0 auto;
 }
 
+.gate-cell {
+  position: relative;
+  display: flex;
+}
+
+.gate-cell > .gate-btn {
+  flex: 1;
+}
+
+/* "What does this gate do?" badge, bottom-right of each gate button. */
+.gate-info {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-2);
+  background: var(--surface);
+  color: var(--ink-2);
+  font: italic 700 0.75rem/1 Georgia, 'Times New Roman', serif;
+}
+
+.gate-info:hover,
+.gate-info:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Bigger invisible hit area for fingers. */
+.gate-info::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
 .gate-btn {
+  -webkit-touch-callout: none;
+  user-select: none;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -1025,6 +1064,17 @@ circle.junction.hi {
   gap: 4px;
   align-items: center;
   font-size: 0.9rem;
+  width: 100%;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+}
+
+.ref-row:hover,
+.ref-row:focus-visible {
+  background: var(--surface-2);
 }
 
 .ref-row code {
@@ -1035,6 +1085,113 @@ circle.junction.hi {
 
 .ref-row b {
   font-family: var(--mono);
+}
+
+/* ---------- gate card ---------- */
+
+.gate-dialog {
+  width: min(440px, calc(100vw - 32px));
+}
+
+.gc-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gc-head .gate-icon {
+  width: 64px;
+  height: 46px;
+}
+
+.gc-head h2 {
+  margin: 0;
+  font-family: var(--mono);
+}
+
+.gc-say {
+  display: block;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--ink-2);
+}
+
+.gc-say i {
+  font-style: normal;
+}
+
+.gc-head code {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.gc-rule {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 10px 0;
+}
+
+.gc-try {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.gc-circuit {
+  flex: 1;
+  min-width: 0;
+}
+
+.gc-circuit .circuit-svg {
+  max-height: 150px;
+}
+
+/* The single gate needs no slot number. */
+.gc-circuit .slot-num {
+  display: none;
+}
+
+.gc-tt {
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.gc-tt th,
+.gc-tt td {
+  width: 26px;
+  height: 24px;
+}
+
+.gc-tt th {
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+.gc-tt td.v1 {
+  font-weight: 800;
+}
+
+.gc-tt tr.now td {
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  box-shadow: inset 0 2px 0 var(--accent), inset 0 -2px 0 var(--accent);
+}
+
+.gc-hint {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  text-align: center;
+}
+
+.gc-analogy {
+  margin: 12px 0 4px;
+  line-height: 1.5;
 }
 
 .stats {
